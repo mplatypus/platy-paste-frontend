@@ -6,7 +6,7 @@ import { DEFAULT_MIME, fileTypeToMime, typeToMime } from "./types"
 
 const VERSION = 1
 
-const BASE_API_URL = `${PUBLIC_API_URL}/v${VERSION}`
+const BASE_API_URL = `${PUBLIC_API_URL.trim().replace(/\/$/, "")}/v${VERSION}`
 
 /* /paste endpoints */
 
