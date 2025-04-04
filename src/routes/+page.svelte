@@ -13,8 +13,9 @@
 <div id="base">
     <h1 id="title">Welcome to Platy Paste!</h1>
     <div id="description" class="base-section">
-        <p>A really cool description</p>
-        <p>goes right here.</p>
+        <p>Welcome to platy paste!</p>
+        <p>A cool site made by MPlaty.</p>
+        <p>You can find out more <a class="link" href="https://github.com/mplatypus/platy-paste-frontend">here</a>.</p>
     </div>
     <div id="q-and-a" class="base-section">
         <a href="#q-and-a"><h3>Q and A's</h3></a>
@@ -22,12 +23,13 @@
     </div>
     <div id="documentation" class="base-section">
         <a href="#documentation"><h3>API Documentation</h3></a>
-        <p>The API Documentation can be found below.</p>
+        <p>The API Documentation can be found <a class="link" href="/docs">here</a>.</p>
+        
     </div>
 </div>
 
 <style lang="postcss">
-    :global(p, h1, h3) {
+    :global(p, h1, h3, a) {
         color: white;
         font-family: quicksand, sans-serif;
     }
@@ -64,5 +66,11 @@
 
     #description > p {
         font-size: medium;
+    }
+
+    .link {
+        color: var(--color-blue-500);
+        font-family: quicksand, sans-serif;
+        font-weight: 400;
     }
 </style>
