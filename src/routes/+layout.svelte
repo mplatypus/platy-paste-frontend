@@ -1,6 +1,6 @@
 <script>
     import "../app.css"
-    import "@material/web/all.js"
+    //import "@material/web/all.js"
     let { children } = $props()
 </script>
 

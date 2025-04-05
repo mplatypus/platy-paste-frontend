@@ -29,6 +29,8 @@
 </div>
 
 <style lang="postcss">
+    @reference "tailwindcss";
+
     :global(p, h1, h3, a) {
         color: white;
         font-family: quicksand, sans-serif;
