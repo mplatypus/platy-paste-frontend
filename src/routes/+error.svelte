@@ -12,8 +12,6 @@
     let trace = null
     let time = null
 
-    console.log(error)
-
     if (error == null) {
         goto("/")
     }
@@ -61,6 +59,7 @@
 
 <style lang="postcss">
     @reference "tailwindcss";
+    
     :global(html) {
         background-color: theme(--color-black);
         overflow-x: hidden;
