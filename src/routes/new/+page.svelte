@@ -9,6 +9,27 @@
     import { uploadPaste } from "$lib/backend"
     import { PasteResponseError } from "$lib/errors"
 
+    function generateDefaultExpiry(): string {
+        var now = new Date();
+        var utcString = now.toISOString().substring(0,19);
+        var year = now.getFullYear();
+        var month = now.getMonth() + 1;
+        var day = now.getDate();
+        var hour = now.getHours();
+        var minute = now.getMinutes();
+        var second = now.getSeconds();
+        var localDatetime = year + "-" +
+                        (month < 10 ? "0" + month.toString() : month) + "-" +
+                        (day < 10 ? "0" + day.toString() : day) + "T" +
+                        (hour < 10 ? "0" + hour.toString() : hour) + ":" +
+                        (minute < 10 ? "0" + minute.toString() : minute) +
+                        utcString.substring(16,19);
+        
+        return localDatetime
+    }
+
+    let enableExpiry: boolean = false;
+    let expiry: string = generateDefaultExpiry();
     let documents: Document[] = []
 
     // This is run to add a default document to the page.
@@ -49,8 +70,23 @@
     async function submitPaste() {
         if (!validateDocuments()) return
 
+        let exp: number | undefined = undefined;
+        if (enableExpiry) {
+            const localDate = new Date(expiry);
+            const utcTimestamp = Date.UTC(
+                localDate.getFullYear(),
+                localDate.getMonth(),
+                localDate.getDate(),
+                localDate.getHours(),
+                localDate.getMinutes(),
+                localDate.getSeconds()
+            );
+
+            exp = Math.floor(utcTimestamp / 1000);
+        }
+
         try {
-            let paste = await uploadPaste(documents)
+            let paste = await uploadPaste(documents, {expiry: exp});
 
             goto(`/p/${paste.id}`)
         } catch (err) {
@@ -74,12 +110,34 @@
 
 <HeaderDiv content="New Paste"></HeaderDiv>
 
-<div id="documents">
-    <p
-        id="upload-error-message"
-        class:error-is-empty={errorIsEmpty}
-        bind:this={err}
-    ></p>
+<p
+    id="upload-error-message"
+    class:error-is-empty={errorIsEmpty}
+    bind:this={err}
+></p>
+
+<div id="paste">
+    <div id="paste-settings">
+        <h2 id="paste-settings-header">Paste Settings</h2>
+        <div id="expiry-div" class="paste-setting">
+            <h3 id="paste-setting-expiry-header" class="paste-setting-header">Expiry</h3>
+            <div id="expiry-settings">
+                <p>Enable Expiry</p>
+            <input
+                id="paste-expiry-enable"
+                type="checkbox"
+                bind:checked={enableExpiry}
+                >
+            <p>Set Expiry</p>
+            <input
+                id="paste-expiry"
+                type="datetime-local"
+                bind:value={expiry}
+                >
+            </div>
+        </div>
+    </div>
+
     {#each documents as doc (doc.id)}
         <div class="document">
             <div class="document-header">
@@ -126,19 +184,21 @@
 <style lang="postcss">
     @reference "tailwindcss";
 
+    :global(h1, h2, h3, p, input) {
+        font-family: quicksand, sans-serif;
+        color: var(--color-white);
+    }
+
     :global(html) {
         background-color: theme(--color-black);
         overflow-x: hidden;
     }
 
-    #documents {
+    #upload-error-message {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-    }
-
-    #upload-error-message {
         color: var(--color-red-400);
         font-family: quicksand, sans-serif;
         border-radius: var(--radius-md);
@@ -154,12 +214,79 @@
         visibility: none;
     }
 
+    #paste {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    #paste-settings {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 95%;
+        gap: 0.5rem;
+        padding: 1rem 0;
+        background-color: var(--color-gray-700);
+        border-radius: var(--radius-md);
+        border: 0.25rem solid var(--color-white);
+    }
+
+    #paste-settings-header {
+        font-size: var(--text-xl);
+        font-weight: 700;
+    }
+
+    .paste-setting {
+        gap: 1rem;
+    }
+
+    .paste-setting-header {
+        font-size: var(--text-lg);
+        font-weight: 600;
+    }
+
+    #expiry-div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #expiry-settings {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    #paste-expiry-enable {
+        color: var(--color-white);
+        border: none;
+        border-radius: var(--radius-md);
+        background-color: var(--color-gray-500);
+        align-items: center;
+        height: 95%;
+    }
+
+    #paste-expiry {
+        color: var(--color-white);
+        border: none;
+        border-radius: var(--radius-md);
+        background-color: var(--color-gray-500);
+        align-items: center;
+        height: 95%;
+    }
+
     .document {
         width: 95%;
         background-color: var(--color-gray-700);
         border-radius: var(--radius-md);
         border: 0.25rem solid var(--color-white);
-        margin-bottom: 2.5%;
     }
 
     /* Document Header */
@@ -181,10 +308,6 @@
 
     .document-header-title > * {
         margin-right: 1rem;
-    }
-
-    .document-header-title > p {
-        color: var(--color-white);
     }
 
     #document-header-title-name-input,

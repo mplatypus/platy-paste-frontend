@@ -20,6 +20,7 @@ Below is a list of features. The checked boxes mean they have been implemented.
         - [ ] Error handling when pastes fail to upload.
         - [ ] Support tab indenting text.
         - [ ] Support more file types.
+        - [x] Expiry support.
     - [x] View
         - [x] View documents.
         - [x] [Shiki](https://shiki.style/) support.
