@@ -30,9 +30,23 @@ export async function fetchPaste(
     }
 }
 
-export async function uploadPaste(documents: Document[]): Promise<Paste> {
+interface UploadPasteSettings {
+    content?: boolean,
+    expiry?: number
+}
+
+export async function uploadPaste(
+    documents: Document[],
+    settings: UploadPasteSettings = {}
+): Promise<Paste> {
     try {
         const formData = new FormData()
+
+        let payload = {
+            expiry: settings.expiry
+        }
+
+        formData.append("payload", new Blob([JSON.stringify(payload)], { type: "application/json" }))
 
         documents.forEach((doc) => {
             let mime = DEFAULT_MIME
@@ -51,7 +65,13 @@ export async function uploadPaste(documents: Document[]): Promise<Paste> {
             formData.append(doc.name, new Blob([doc.content], { type: mime })) // FIXME: This should be changed to a valid type, and not just the type of document.
         })
 
-        const response = await fetch(`${BASE_API_URL}/pastes`, {
+        let query = "";
+
+        if (settings.content != undefined) {
+            query = `?content=${settings.content}`
+        }
+
+        const response = await fetch(`${BASE_API_URL}/pastes${query}`, {
             method: "POST",
             mode: "cors",
             body: formData,
