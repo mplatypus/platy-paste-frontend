@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { Paste } from "$lib/models/paste"
+    import type { Document } from "$lib/models/document"
     import { codeToHtml } from "shiki"
     import HeaderDiv from "$lib/components/header.svelte"
     import {
@@ -9,6 +10,37 @@
         mimeToType,
     } from "$lib/types"
     export let data: { paste: Paste }
+
+    function copyContent(content: string): null {
+        navigator.clipboard.writeText(content).then(() => {
+            alert("Copied!")
+        })
+
+        return null
+    }
+
+    async function convertContent(document: Document): Promise<string> {
+        return await codeToHtml(document.content, {
+            lang: mimeToShiki(document.type) || DEFAULT_SHIKI,
+            theme: "dracula",
+            transformers: [
+                {
+                    pre(node) {
+                        node.properties.class =
+                            (node.properties.class || "") + "shiki-pre"
+                        const existing = node.properties.style || ""
+                        node.properties.style =
+                            `${existing}; background-color: var(--color-content-primary); color: white;`.trim()
+                    },
+                    line(hast, _) {
+                        const existing = hast.properties.style || ""
+                        hast.properties.style =
+                            `${existing}; font-family: var(--code-font); font-size: var(--text-base);`.trim()
+                    },
+                },
+            ],
+        })
+    }
 </script>
 
 <svelte:head>
@@ -25,14 +57,20 @@
 <div id="documents">
     {#each data.paste.documents as document}
         <div class="document">
-            <div class="document-information">
-                <p class="document-information-name">{document.name}</p>
-                <p class="document-information-type">
-                    {mimeToType(document.type) || DEFAULT_TYPE}
-                </p>
+            <div class="document-header">
+                <div class="document-information">
+                    <p class="document-information-name">{document.name}</p>
+                    <p class="document-information-type">
+                        {mimeToType(document.type) || DEFAULT_TYPE}
+                    </p>
+                </div>
+                <button
+                    class="document-copy"
+                    on:click={() => copyContent(document.content)}>copy</button
+                >
             </div>
             <div class="document-content">
-                {#await codeToHtml( document.content, { lang: mimeToShiki(document.type) || DEFAULT_SHIKI, theme: "dracula" }, ) then val}
+                {#await convertContent(document) then val}
                     {@html val}
                 {/await}
             </div>
@@ -44,8 +82,13 @@
     @reference "tailwindcss";
 
     :global(html) {
-        background-color: theme(--color-black);
+        background-color: var(--color-background);
         overflow-x: hidden;
+    }
+
+    :global(h1, h2, h3, p) {
+        font-family: var(--main-font);
+        color: var(--color-text);
     }
 
     #documents {
@@ -53,47 +96,68 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        margin-top: 1.5rem;
+        gap: 2.5rem;
     }
 
     .document {
         width: 95%;
-        background-color: var(--color-gray-700);
-        border-radius: var(--radius-md);
-        border: 0.25rem solid var(--color-white);
-        margin-bottom: 2.5%;
+        background-color: var(--color-header-primary);
+        border-radius: var(--radius-xl);
+    }
+
+    .document-header {
+        height: 3rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 0.5rem;
     }
 
     .document-information {
-        padding: 0.5rem;
-        background-color: var(--color-gray-700);
-        border-radius: var(--radius-md);
         display: flex;
         flex-direction: row;
         align-items: center;
     }
 
     .document-information-name {
-        color: var(--color-gray-300);
+        font-size: var(--text-lg);
+        font-weight: 500;
     }
 
     .document-information-type {
         margin-left: 1rem;
         padding: 0.125rem 0.5rem;
-
         border-radius: var(--radius-sm);
-        background-color: var(--color-gray-500);
+        background-color: var(--color-content-primary);
+    }
+
+    .document-copy {
+        border-radius: var(--radius-md);
+        background-color: var(--color-button-primary);
+        color: var(--color-text);
+        height: 2rem;
+        margin: 0 0.5rem;
+        padding: 0 0.5rem;
     }
 
     .document-information > p {
         font-family: quicksand, sans-serif;
-        color: var(--color-white);
+        color: var(--color-text);
     }
 
     .document-content {
-        padding: 0 0.25rem;
-        overflow: auto;
-        background-color: var(--color-black);
-        border-radius: var(--radius-sm);
+        background-color: var(--color-content-primary);
+        height: max-content;
+        padding: 0.25rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    }
+
+    :global(.shiki-pre:focus) {
+        outline: none;
     }
 
     @layer utilities {
@@ -102,18 +166,16 @@
         }
 
         .document-content::-webkit-scrollbar-track {
-            border-radius: var(--radius-md);
-            background: var(--color-black);
-            border: 3px solid var(--color-white);
+            border-radius: var(--radius-xl);
         }
 
         .document-content::-webkit-scrollbar-thumb {
-            background: var(--color-white);
-            border-radius: var(--radius-md);
+            background: var(--color-button-secondary);
+            border-radius: var(--radius-xl);
         }
 
         .document-content::-webkit-scrollbar-thumb:hover {
-            background: var(--color-gray-400);
+            background: var(--color-button-primary);
         }
     }
 </style>

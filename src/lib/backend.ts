@@ -1,7 +1,12 @@
 import { PUBLIC_API_URL } from "$env/static/public"
 import type { Paste } from "./models/paste"
 import type { Document } from "./models/document"
-import { PasteResponseError, type APIError, PasteUploadError } from "./errors"
+import {
+    PasteResponseError,
+    type APIError,
+    PasteUploadError,
+    PasteError,
+} from "./errors"
 import { DEFAULT_MIME, fileTypeToMime, typeToMime } from "./types"
 
 const VERSION = 1
@@ -31,22 +36,25 @@ export async function fetchPaste(
 }
 
 interface UploadPasteSettings {
-    content?: boolean,
+    content?: boolean
     expiry?: number
 }
 
 export async function uploadPaste(
     documents: Document[],
-    settings: UploadPasteSettings = {}
+    settings: UploadPasteSettings = {},
 ): Promise<Paste> {
     try {
         const formData = new FormData()
 
         let payload = {
-            expiry: settings.expiry
+            expiry: settings.expiry,
         }
 
-        formData.append("payload", new Blob([JSON.stringify(payload)], { type: "application/json" }))
+        formData.append(
+            "payload",
+            new Blob([JSON.stringify(payload)], { type: "application/json" }),
+        )
 
         documents.forEach((doc) => {
             let mime = DEFAULT_MIME
@@ -65,7 +73,7 @@ export async function uploadPaste(
             formData.append(doc.name, new Blob([doc.content], { type: mime })) // FIXME: This should be changed to a valid type, and not just the type of document.
         })
 
-        let query = "";
+        let query = ""
 
         if (settings.content != undefined) {
             query = `?content=${settings.content}`
@@ -83,11 +91,15 @@ export async function uploadPaste(
 
         let error: APIError = await response.json()
 
+        console.log("backend api error:", error)
+
         throw PasteResponseError.fromAPIError(response.status, error)
     } catch (err) {
+        if (err instanceof PasteResponseError) throw err
+
         let message = "Unknown Error"
         if (err instanceof Error) message = err.message
 
-        throw new PasteUploadError(message)
+        throw new PasteError(message)
     }
 }

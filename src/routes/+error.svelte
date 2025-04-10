@@ -59,7 +59,7 @@
 
 <style lang="postcss">
     @reference "tailwindcss";
-    
+
     :global(html) {
         background-color: theme(--color-black);
         overflow-x: hidden;
