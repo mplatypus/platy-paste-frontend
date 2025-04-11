@@ -30,13 +30,13 @@
     #header-div {
         padding: 0.5rem;
         background-color: var(--color-background);
-
         position: sticky;
         top: 0;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+        z-index: 5;
     }
 
     .header-div-item {

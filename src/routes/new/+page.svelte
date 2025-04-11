@@ -132,11 +132,13 @@
             <h3 id="paste-setting-expiry-header" class="paste-setting-header">
                 Expiry
             </h3>
-            <input
-                id="paste-expiry-enable"
-                type="checkbox"
-                bind:checked={enableExpiry}
-            />
+            <label id="paste-expiry-toggle">
+                <input
+                    type="checkbox"
+                    bind:checked={enableExpiry}
+                />
+                <span></span>
+              </label>
             <input
                 id="paste-expiry"
                 type="datetime-local"
@@ -274,41 +276,58 @@
         gap: 0.5rem;
     }
 
-    #paste-expiry-enable {
-        width: 1.5rem;
-        height: 1.5rem;
-        appearance: none;
-        -webkit-appearance: none;
-        background-color: var(--color-button-secondary);
-        border-radius: 0.25rem;
-        cursor: pointer;
+    #paste-expiry-toggle {
         position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
     }
 
-    #paste-expiry-enable:checked {
+    #paste-expiry-toggle > input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    #paste-expiry-toggle > span {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 34px;
+        background-color: var(--color-gray-500);
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    #paste-expiry-toggle > span:before {
+        position: absolute;
+        content: "";
+        height: 15px;
+        width: 15px;
+        left: 2.5px;
+        bottom: 2.5px;
+        border-radius: 50%;
+        background-color: var(--color-white);
+        -webkit-transition: .2s;
+        transition: .2s;
+    }
+
+    #paste-expiry-toggle > span:hover {
+        filter: brightness(95%);
+    }
+
+    #paste-expiry-toggle > input:checked + span {
         background-color: var(--color-button-primary);
     }
 
-    #paste-expiry-enable::after {
-        position: absolute;
-        top: 0.25rem;
-        left: 0.45rem;
-        width: 0.25rem;
-        height: 0.5rem;
-        border: none;
-        transform: rotate(45deg);
-        opacity: 0;
-    }
-
-    #paste-expiry-enable:checked::after {
-        opacity: 1;
-    }
-
-    #paste-expiry:read-only {
-        background-color: var(--color-gray-600);
-        pointer-events: none;
-        opacity: 0.6;
-    }
+    #paste-expiry-toggle > input:checked + span:before {
+        -webkit-transform: translateX(20px);
+        -ms-transform: translateX(20px);
+        transform: translateX(20px);
+    }  
 
     #paste-expiry {
         color: var(--color-text);
@@ -317,6 +336,18 @@
         background-color: var(--color-gray-500);
         align-items: center;
         height: 95%;
+        -webkit-transition: .2s;
+        transition: .2s;
+    }
+
+    #paste-expiry:hover:not(:read-only) {
+        filter: brightness(95%);
+    }
+
+    #paste-expiry:read-only {
+        background-color: var(--color-gray-600);
+        pointer-events: none;
+        opacity: 0.6;
     }
 
     .document {
@@ -326,7 +357,6 @@
         overflow: hidden;
     }
 
-    /* Document Header */
     .document-header {
         height: 3rem;
         display: flex;
@@ -360,6 +390,12 @@
         border-radius: var(--radius-md);
         align-items: center;
         font-size: var(--text-lg);
+        transition: 0.2s;
+    }
+
+    #document-header-title-name-input:hover,
+    #document-header-title-type-input:hover {
+        filter: brightness(120%);
     }
 
     #document-header-title-name-input:focus,
