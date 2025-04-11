@@ -2,34 +2,37 @@
     import { goto } from "$app/navigation"
     import HeaderDiv from "$lib/components/header.svelte"
     import autosize from "svelte-autosize"
-
     import { getAllTypes } from "$lib/types"
-
     import type { Document } from "$lib/models/document"
     import { uploadPaste } from "$lib/backend"
     import { PasteResponseError } from "$lib/errors"
 
     function generateDefaultExpiry(): string {
-        var now = new Date();
-        var utcString = now.toISOString().substring(0,19);
-        var year = now.getFullYear();
-        var month = now.getMonth() + 1;
-        var day = now.getDate();
-        var hour = now.getHours();
-        var minute = now.getMinutes();
-        var second = now.getSeconds();
-        var localDatetime = year + "-" +
-                        (month < 10 ? "0" + month.toString() : month) + "-" +
-                        (day < 10 ? "0" + day.toString() : day) + "T" +
-                        (hour < 10 ? "0" + hour.toString() : hour) + ":" +
-                        (minute < 10 ? "0" + minute.toString() : minute) +
-                        utcString.substring(16,19);
-        
+        var now = new Date()
+        var utcString = now.toISOString().substring(0, 19)
+        var year = now.getFullYear()
+        var month = now.getMonth() + 1
+        var day = now.getDate()
+        var hour = now.getHours()
+        var minute = now.getMinutes()
+        var second = now.getSeconds()
+        var localDatetime =
+            year +
+            "-" +
+            (month < 10 ? "0" + month.toString() : month) +
+            "-" +
+            (day < 10 ? "0" + day.toString() : day) +
+            "T" +
+            (hour < 10 ? "0" + hour.toString() : hour) +
+            ":" +
+            (minute < 10 ? "0" + minute.toString() : minute) +
+            utcString.substring(16, 19)
+
         return localDatetime
     }
 
-    let enableExpiry: boolean = false;
-    let expiry: string = generateDefaultExpiry();
+    let enableExpiry: boolean = false
+    let expiry: string = generateDefaultExpiry()
     let documents: Document[] = []
 
     // This is run to add a default document to the page.
@@ -48,7 +51,7 @@
             {
                 id: newId,
                 paste_id: "-1",
-                type: "txt",
+                type: "text",
                 name: "new.txt",
                 content: "",
             },
@@ -65,39 +68,40 @@
 
     let err
     let errorMessage = ""
-    $: errorIsEmpty = !errorMessage.trim()
+    $: errorIsEmpty = errorMessage.trim() === ""
 
     async function submitPaste() {
         if (!validateDocuments()) return
 
-        let exp: number | undefined = undefined;
+        let exp: number | undefined = undefined
         if (enableExpiry) {
-            const localDate = new Date(expiry);
+            const localDate = new Date(expiry)
             const utcTimestamp = Date.UTC(
                 localDate.getFullYear(),
                 localDate.getMonth(),
                 localDate.getDate(),
                 localDate.getHours(),
                 localDate.getMinutes(),
-                localDate.getSeconds()
-            );
+                localDate.getSeconds(),
+            )
 
-            exp = Math.floor(utcTimestamp / 1000);
+            exp = Math.floor(utcTimestamp / 1000)
         }
 
         try {
-            let paste = await uploadPaste(documents, {expiry: exp});
+            let paste = await uploadPaste(documents, { expiry: exp })
 
             goto(`/p/${paste.id}`)
         } catch (err) {
-            let message = "Unknown Error"
-
-            if (err instanceof Error) message = err.message
+            errorMessage = "Unknown Error"
 
             if (err instanceof PasteResponseError) {
-                if (err.trace) message = err.trace
-                message = err.reason
-            }
+                if (err.trace) {
+                    errorMessage = err.trace
+                } else {
+                    errorMessage = err.reason
+                }
+            } else if (err instanceof Error) errorMessage = err.message
         }
     }
 </script>
@@ -110,31 +114,30 @@
 
 <HeaderDiv content="New Paste"></HeaderDiv>
 
-<p
-    id="upload-error-message"
-    class:error-is-empty={errorIsEmpty}
-    bind:this={err}
-></p>
-
 <div id="paste">
+    <p
+        id="upload-error-message"
+        style:display={errorIsEmpty ? "none" : "flex"}
+        bind:this={err}
+    >
+        {errorMessage}
+    </p>
     <div id="paste-settings">
         <h2 id="paste-settings-header">Paste Settings</h2>
         <div id="expiry-div" class="paste-setting">
-            <h3 id="paste-setting-expiry-header" class="paste-setting-header">Expiry</h3>
-            <div id="expiry-settings">
-                <p>Enable Expiry</p>
-            <input
-                id="paste-expiry-enable"
-                type="checkbox"
-                bind:checked={enableExpiry}
-                >
-            <p>Set Expiry</p>
+            <h3 id="paste-setting-expiry-header" class="paste-setting-header">
+                Expiry
+            </h3>
+            <label id="paste-expiry-toggle">
+                <input type="checkbox" bind:checked={enableExpiry} />
+                <span></span>
+            </label>
             <input
                 id="paste-expiry"
                 type="datetime-local"
                 bind:value={expiry}
-                >
-            </div>
+                readonly={!enableExpiry}
+            />
         </div>
     </div>
 
@@ -142,21 +145,23 @@
         <div class="document">
             <div class="document-header">
                 <div class="document-header-title">
-                    <p id="document-header-title-name">Title:</p>
+                    <p class="document-header-title-name">Title:</p>
                     <input
-                        id="document-header-title-name-input"
+                        class="document-header-title-name-input"
                         type="text"
                         defaultValue="new.txt"
                         max="50"
                         bind:value={doc.name}
                     />
-                    <p id="document-header-title-type">Type:</p>
+                    <p class="document-header-title-type">Type:</p>
                     <select
-                        id="document-header-title-type-input"
+                        class="document-header-title-type-input"
                         bind:value={doc.type}
                     >
                         {#each getAllTypes() as validType}
-                            <option>{validType}</option>
+                            <option selected={doc.type == "txt"}
+                                >{validType}</option
+                            >
                         {/each}
                     </select>
                 </div>
@@ -184,34 +189,19 @@
 <style lang="postcss">
     @reference "tailwindcss";
 
-    :global(h1, h2, h3, p, input) {
-        font-family: quicksand, sans-serif;
-        color: var(--color-white);
+    :global(h1, h2, h3, p) {
+        font-family: var(--main-font);
+        color: var(--color-text);
+    }
+
+    :global(textarea, input, select, option) {
+        font-family: var(--code-font);
+        color: var(--color-text);
     }
 
     :global(html) {
-        background-color: theme(--color-black);
+        background-color: var(--color-background);
         overflow-x: hidden;
-    }
-
-    #upload-error-message {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: var(--color-red-400);
-        font-family: quicksand, sans-serif;
-        border-radius: var(--radius-md);
-        padding: 0.25rem 0.5rem;
-    }
-
-    .error-is-empty {
-        margin: 0;
-        padding: 0;
-        height: 0;
-        width: 0;
-        display: none;
-        visibility: none;
     }
 
     #paste {
@@ -219,25 +209,47 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 2rem;
+        margin-top: 1.5rem;
+        gap: 2.5rem;
+    }
+
+    #upload-error-message {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--color-danger-primary);
+        font-family: quicksand, sans-serif;
+        border-radius: var(--radius-xl);
+        padding: 0.25rem 0.5rem;
+
+        width: 95%;
+        font-size: var(--text-xl);
+        font-weight: 600;
     }
 
     #paste-settings {
+        background-color: var(--color-header-primary);
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         width: 95%;
         gap: 0.5rem;
-        padding: 1rem 0;
-        background-color: var(--color-gray-700);
-        border-radius: var(--radius-md);
-        border: 0.25rem solid var(--color-white);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+    }
+
+    .paste-setting {
+        background-color: var(--color-content-primary);
+        width: 100%;
+        padding: 0.5rem;
     }
 
     #paste-settings-header {
         font-size: var(--text-xl);
         font-weight: 700;
+        padding-top: 0.5rem;
     }
 
     .paste-setting {
@@ -251,55 +263,103 @@
 
     #expiry-div {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    #expiry-settings {
-        display: flex;
         flex-direction: row;
-        justify-content: center;
+        justify-content: start;
         align-items: center;
         gap: 0.5rem;
     }
 
-    #paste-expiry-enable {
-        color: var(--color-white);
-        border: none;
-        border-radius: var(--radius-md);
+    #paste-expiry-toggle {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
+    }
+
+    #paste-expiry-toggle > input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    #paste-expiry-toggle > span {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 34px;
         background-color: var(--color-gray-500);
-        align-items: center;
-        height: 95%;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+    }
+
+    #paste-expiry-toggle > span:before {
+        position: absolute;
+        content: "";
+        height: 15px;
+        width: 15px;
+        left: 2.5px;
+        bottom: 2.5px;
+        border-radius: 50%;
+        background-color: var(--color-white);
+        -webkit-transition: 0.2s;
+        transition: 0.2s;
+    }
+
+    #paste-expiry-toggle > span:hover {
+        filter: brightness(95%);
+    }
+
+    #paste-expiry-toggle > input:checked + span {
+        background-color: var(--color-button-primary);
+    }
+
+    #paste-expiry-toggle > input:checked + span:before {
+        -webkit-transform: translateX(20px);
+        -ms-transform: translateX(20px);
+        transform: translateX(20px);
     }
 
     #paste-expiry {
-        color: var(--color-white);
+        color: var(--color-text);
         border: none;
         border-radius: var(--radius-md);
         background-color: var(--color-gray-500);
         align-items: center;
         height: 95%;
+        -webkit-transition: 0.2s;
+        transition: 0.2s;
+    }
+
+    #paste-expiry:hover:not(:read-only) {
+        filter: brightness(95%);
+    }
+
+    #paste-expiry:read-only {
+        background-color: var(--color-gray-600);
+        pointer-events: none;
+        opacity: 0.6;
     }
 
     .document {
         width: 95%;
-        background-color: var(--color-gray-700);
-        border-radius: var(--radius-md);
-        border: 0.25rem solid var(--color-white);
+        background-color: var(--color-header-primary);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
     }
 
-    /* Document Header */
     .document-header {
-        height: 2.5rem;
+        height: 3rem;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+        padding: 0 0.5rem;
     }
 
     .document-header-title {
-        background-color: var(--color-gray-700);
         border-radius: var(--radius-md);
         display: flex;
         flex-direction: row;
@@ -310,42 +370,55 @@
         margin-right: 1rem;
     }
 
-    #document-header-title-name-input,
-    #document-header-title-type-input {
-        color: var(--color-white);
-        border: none;
-        border-radius: var(--radius-md);
-        background-color: var(--color-gray-500);
-        align-items: center;
-        height: 95%;
+    .document-header-title > p {
+        font-size: var(--text-lg);
+        font-weight: 400;
     }
 
-    #document-header-title-name-input:focus {
+    .document-header-title-name-input,
+    .document-header-title-type-input {
+        background-color: var(--color-content-primary);
+        color: var(--color-text);
+        border: none;
+        border-radius: var(--radius-md);
+        align-items: center;
+        font-size: var(--text-lg);
+        transition: 0.2s;
+    }
+
+    .document-header-title-name-input:hover,
+    .document-header-title-type-input:hover {
+        filter: brightness(120%);
+    }
+
+    .document-header-title-name-input:focus,
+    .document-header-title-type-input:focus,
+    #paste-expiry:focus {
         outline: none;
     }
 
     .document-header-button-delete {
+        background-color: var(--color-danger-primary);
+        color: var(--color-text);
         border-radius: var(--radius-md);
-
-        color: white;
         height: 2rem;
         margin: 0 0.5rem;
         padding: 0 0.5rem;
     }
 
     .document-header-button-delete:disabled {
-        background-color: var(--color-red-400);
+        background-color: var(--color-danger-disabled);
+        cursor: not-allowed;
     }
 
     /* Document content */
     .document-content {
-        background-color: var(--color-black);
+        background-color: var(--color-content-primary);
         height: max-content;
     }
 
     .document-content > textarea {
-        border-radius: var(--radius-md);
-        color: white;
+        font-size: var(--text-base);
         width: 100%;
         min-height: 3em;
         resize: none;
@@ -361,16 +434,20 @@
 
     /* Buttons */
 
+    #buttons {
+        margin-bottom: 2.5rem;
+    }
+
     #buttons > button {
         border-radius: var(--radius-md);
-        background-color: var(--color-red-600);
-        color: white;
+        background-color: var(--color-button-primary);
+        color: var(--color-text);
         height: 2rem;
         margin: 0 0.5rem;
         padding: 0 0.5rem;
     }
 
     #buttons > button:disabled {
-        background-color: var(--color-red-400);
+        background-color: var(--color-button-disabled);
     }
 </style>
