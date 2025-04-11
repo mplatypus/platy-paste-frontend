@@ -4,7 +4,6 @@ import type { Document } from "./models/document"
 import {
     PasteResponseError,
     type APIError,
-    PasteUploadError,
     PasteError,
 } from "./errors"
 import { DEFAULT_MIME, fileTypeToMime, typeToMime } from "./types"
@@ -70,7 +69,7 @@ export async function uploadPaste(
                 mime = newMime
             }
 
-            formData.append(doc.name, new Blob([doc.content], { type: mime })) // FIXME: This should be changed to a valid type, and not just the type of document.
+            formData.append(doc.name, new Blob([doc.content], { type: mime }))
         })
 
         let query = ""
@@ -90,8 +89,6 @@ export async function uploadPaste(
         }
 
         let error: APIError = await response.json()
-
-        console.log("backend api error:", error)
 
         throw PasteResponseError.fromAPIError(response.status, error)
     } catch (err) {

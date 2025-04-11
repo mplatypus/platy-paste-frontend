@@ -2,12 +2,10 @@
     import { goto } from "$app/navigation"
     import HeaderDiv from "$lib/components/header.svelte"
     import autosize from "svelte-autosize"
-
     import { getAllTypes } from "$lib/types"
-
     import type { Document } from "$lib/models/document"
     import { uploadPaste } from "$lib/backend"
-    import { PasteResponseError, PasteUploadError } from "$lib/errors"
+    import { PasteResponseError } from "$lib/errors"
 
     function generateDefaultExpiry(): string {
         var now = new Date()
@@ -97,8 +95,6 @@
         } catch (err) {
             errorMessage = "Unknown Error"
 
-            console.log("msg", err)
-
             if (err instanceof PasteResponseError) {
                 if (err.trace) {
                     errorMessage = err.trace
@@ -133,12 +129,9 @@
                 Expiry
             </h3>
             <label id="paste-expiry-toggle">
-                <input
-                    type="checkbox"
-                    bind:checked={enableExpiry}
-                />
+                <input type="checkbox" bind:checked={enableExpiry} />
                 <span></span>
-              </label>
+            </label>
             <input
                 id="paste-expiry"
                 type="datetime-local"
@@ -298,8 +291,8 @@
         bottom: 0;
         border-radius: 34px;
         background-color: var(--color-gray-500);
-        -webkit-transition: .4s;
-        transition: .4s;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
     }
 
     #paste-expiry-toggle > span:before {
@@ -311,8 +304,8 @@
         bottom: 2.5px;
         border-radius: 50%;
         background-color: var(--color-white);
-        -webkit-transition: .2s;
-        transition: .2s;
+        -webkit-transition: 0.2s;
+        transition: 0.2s;
     }
 
     #paste-expiry-toggle > span:hover {
@@ -327,7 +320,7 @@
         -webkit-transform: translateX(20px);
         -ms-transform: translateX(20px);
         transform: translateX(20px);
-    }  
+    }
 
     #paste-expiry {
         color: var(--color-text);
@@ -336,8 +329,8 @@
         background-color: var(--color-gray-500);
         align-items: center;
         height: 95%;
-        -webkit-transition: .2s;
-        transition: .2s;
+        -webkit-transition: 0.2s;
+        transition: 0.2s;
     }
 
     #paste-expiry:hover:not(:read-only) {
