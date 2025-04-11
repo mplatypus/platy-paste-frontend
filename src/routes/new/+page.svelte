@@ -152,17 +152,17 @@
         <div class="document">
             <div class="document-header">
                 <div class="document-header-title">
-                    <p id="document-header-title-name">Title:</p>
+                    <p class="document-header-title-name">Title:</p>
                     <input
-                        id="document-header-title-name-input"
+                        class="document-header-title-name-input"
                         type="text"
                         defaultValue="new.txt"
                         max="50"
                         bind:value={doc.name}
                     />
-                    <p id="document-header-title-type">Type:</p>
+                    <p class="document-header-title-type">Type:</p>
                     <select
-                        id="document-header-title-type-input"
+                        class="document-header-title-type-input"
                         bind:value={doc.type}
                     >
                         {#each getAllTypes() as validType}
@@ -382,8 +382,8 @@
         font-weight: 400;
     }
 
-    #document-header-title-name-input,
-    #document-header-title-type-input {
+    .document-header-title-name-input,
+    .document-header-title-type-input {
         background-color: var(--color-content-primary);
         color: var(--color-text);
         border: none;
@@ -393,13 +393,13 @@
         transition: 0.2s;
     }
 
-    #document-header-title-name-input:hover,
-    #document-header-title-type-input:hover {
+    .document-header-title-name-input:hover,
+    .document-header-title-type-input:hover {
         filter: brightness(120%);
     }
 
-    #document-header-title-name-input:focus,
-    #document-header-title-type-input:focus,
+    .document-header-title-name-input:focus,
+    .document-header-title-type-input:focus,
     #paste-expiry:focus {
         outline: none;
     }
