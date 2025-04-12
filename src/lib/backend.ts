@@ -1,10 +1,6 @@
 import { PUBLIC_API_URL } from "$env/static/public"
 import type { Paste } from "./models/paste"
-import {
-    PasteResponseError,
-    type APIError,
-    PasteError,
-} from "./errors"
+import { PasteResponseError, type APIError, PasteError } from "./errors"
 import type { NewDocument } from "./models/new"
 import { DEFAULT_MIME, getType } from "./types"
 
