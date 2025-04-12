@@ -1,12 +1,12 @@
 import { PUBLIC_API_URL } from "$env/static/public"
 import type { Paste } from "./models/paste"
-import type { Document } from "./models/document"
 import {
     PasteResponseError,
     type APIError,
     PasteError,
 } from "./errors"
-import { DEFAULT_MIME, fileTypeToMime, typeToMime } from "./types"
+import type { NewDocument } from "./models/new"
+import { DEFAULT_MIME, getType } from "./types"
 
 const VERSION = 1
 
@@ -40,7 +40,7 @@ interface UploadPasteSettings {
 }
 
 export async function uploadPaste(
-    documents: Document[],
+    documents: NewDocument[],
     settings: UploadPasteSettings = {},
 ): Promise<Paste> {
     try {
@@ -56,18 +56,7 @@ export async function uploadPaste(
         )
 
         documents.forEach((doc) => {
-            let mime = DEFAULT_MIME
-
-            let newMime = typeToMime(doc.type)
-            if (newMime == null) {
-                let newMime = fileTypeToMime(doc.type)
-
-                if (newMime != null) {
-                    mime = newMime
-                }
-            } else {
-                mime = newMime
-            }
+            let mime = getType(doc.type)?.mime || DEFAULT_MIME
 
             formData.append(doc.name, new Blob([doc.content], { type: mime }))
         })

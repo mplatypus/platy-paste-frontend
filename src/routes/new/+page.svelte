@@ -4,8 +4,14 @@
     import autosize from "svelte-autosize"
     import { getAllTypes } from "$lib/types"
     import type { Document } from "$lib/models/document"
+
+    import { DEFAULT_TYPE, extractNameFromName } from "$lib/types"
+
     import { uploadPaste } from "$lib/backend"
     import { PasteResponseError } from "$lib/errors"
+    import type { NewDocument } from "$lib/models/new"
+
+    import linkSymbolLight from "$lib/assets/linkSymbolLight.svg"
 
     function generateDefaultExpiry(): string {
         var now = new Date()
@@ -33,7 +39,7 @@
 
     let enableExpiry: boolean = false
     let expiry: string = generateDefaultExpiry()
-    let documents: Document[] = []
+    let documents: NewDocument[] = []
 
     // This is run to add a default document to the page.
     newDocument()
@@ -41,24 +47,35 @@
     function newDocument() {
         const newId =
             documents.length > 0
-                ? (
-                      Math.max(...documents.map((d) => Number(d.id))) + 1
-                  ).toString()
-                : "1"
+                ? Math.max(...documents.map((d) => Number(d.id))) + 1
+                : 1
 
         documents = [
             ...documents,
             {
                 id: newId,
-                paste_id: "-1",
-                type: "text",
+                overrideType: false,
+                type: DEFAULT_TYPE,
                 name: "new.txt",
                 content: "",
             },
         ]
     }
 
-    function deleteDocument(docId: string) {
+    function updateDocumentType(document: NewDocument) {
+        if (document.overrideType) {
+            return
+        }
+
+        const newType = extractNameFromName(document.name)
+        if (!newType) return
+
+        documents = documents.map((d) =>
+            d.id === document.id ? { ...d, type: newType } : d,
+        )
+    }
+
+    function deleteDocument(docId: number) {
         documents = documents.filter((doc) => doc.id !== docId)
     }
 
@@ -152,11 +169,15 @@
                         defaultValue="new.txt"
                         max="50"
                         bind:value={doc.name}
+                        on:change={() => updateDocumentType(doc)}
                     />
                     <p class="document-header-title-type">Type:</p>
                     <select
                         class="document-header-title-type-input"
                         bind:value={doc.type}
+                        on:change={() => {
+                            doc.overrideType = true
+                        }}
                     >
                         {#each getAllTypes() as validType}
                             <option selected={doc.type == "txt"}
@@ -164,6 +185,15 @@
                             >
                         {/each}
                     </select>
+                    <button
+                        class="document-link-type"
+                        on:click={() => {
+                            doc.overrideType = false
+                            updateDocumentType(doc)
+                        }}
+                    >
+                        <img alt="Link type." src={linkSymbolLight} />
+                    </button>
                 </div>
                 <div class="document-header-buttons">
                     <button
@@ -394,6 +424,18 @@
     .document-header-title-name-input:focus,
     .document-header-title-type-input:focus,
     #paste-expiry:focus {
+    .document-link-type {
+        height: 1.5rem;
+        width: 1.5rem;
+    }
+
+    .document-link-type > img {
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+    }
+
+    #document-header-title-name-input:focus {
         outline: none;
     }
 

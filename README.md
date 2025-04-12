@@ -18,7 +18,8 @@ Below is a list of features. The checked boxes mean they have been implemented.
         - [x] Add multiple documents.
         - [x] Error handling when pastes fail to upload.
         - [ ] Support tab indenting text.
-        - [ ] Support more file types.
+        - [x] Support more file types.
+        - [x] Autodetect file type from name.
         - [x] Expiry support.
     - [x] View
         - [x] View documents.

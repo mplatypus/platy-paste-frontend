@@ -6,8 +6,8 @@
     import {
         DEFAULT_SHIKI,
         DEFAULT_TYPE,
-        mimeToShiki,
-        mimeToType,
+        extractNameFromDocument,
+        extractTypeFromDocument,
     } from "$lib/types"
     export let data: { paste: Paste }
 
@@ -21,7 +21,7 @@
 
     async function convertContent(document: Document): Promise<string> {
         return await codeToHtml(document.content, {
-            lang: mimeToShiki(document.type) || DEFAULT_SHIKI,
+            lang: extractTypeFromDocument(document)?.shiki || DEFAULT_SHIKI,
             theme: "dracula",
             transformers: [
                 {
@@ -61,7 +61,7 @@
                 <div class="document-information">
                     <p class="document-information-name">{document.name}</p>
                     <p class="document-information-type">
-                        {mimeToType(document.type) || DEFAULT_TYPE}
+                        {extractNameFromDocument(document) || DEFAULT_TYPE}
                     </p>
                 </div>
                 <button
@@ -71,8 +71,6 @@
             </div>
             <div class="document-content">
                 {#await convertContent(document) then val}
-                    {@html val}
-                {/await}
             </div>
         </div>
     {/each}
