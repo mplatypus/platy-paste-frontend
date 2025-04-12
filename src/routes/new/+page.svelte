@@ -3,7 +3,6 @@
     import HeaderDiv from "$lib/components/header.svelte"
     import autosize from "svelte-autosize"
     import { getAllTypes } from "$lib/types"
-    import type { Document } from "$lib/models/document"
 
     import { DEFAULT_TYPE, extractNameFromName } from "$lib/types"
 
@@ -12,6 +11,7 @@
     import type { NewDocument } from "$lib/models/new"
 
     import linkSymbolLight from "$lib/assets/linkSymbolLight.svg"
+    import linkSymbolDark from "$lib/assets/linkSymbolDark.svg"
 
     function generateDefaultExpiry(): string {
         var now = new Date()
@@ -192,7 +192,11 @@
                             updateDocumentType(doc)
                         }}
                     >
-                        <img alt="Link type." src={linkSymbolLight} />
+                        <picture>
+                            <source srcset={linkSymbolLight} media="(prefers-color-scheme: dark)" />
+                            <source srcset={linkSymbolDark} media="(prefers-color-scheme: light)" />
+                            <img alt="Link type." src={linkSymbolDark} />
+                        </picture>
                     </button>
                 </div>
                 <div class="document-header-buttons">
@@ -432,7 +436,7 @@
         width: 1.5rem;
     }
 
-    .document-link-type > img {
+    .document-link-type > picture {
         height: 100%;
         width: 100%;
         object-fit: contain;
