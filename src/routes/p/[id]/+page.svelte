@@ -71,6 +71,8 @@
             </div>
             <div class="document-content">
                 {#await convertContent(document) then val}
+                {@html val}
+                {/await}
             </div>
         </div>
     {/each}

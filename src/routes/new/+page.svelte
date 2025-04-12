@@ -424,6 +424,9 @@
     .document-header-title-name-input:focus,
     .document-header-title-type-input:focus,
     #paste-expiry:focus {
+        outline: none;
+    }
+
     .document-link-type {
         height: 1.5rem;
         width: 1.5rem;
@@ -433,10 +436,6 @@
         height: 100%;
         width: 100%;
         object-fit: contain;
-    }
-
-    #document-header-title-name-input:focus {
-        outline: none;
     }
 
     .document-header-button-delete {
