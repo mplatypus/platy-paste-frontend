@@ -15,7 +15,12 @@
     <div id="description" class="base-section">
         <p>Welcome to platy paste!</p>
         <p>A cool site made by MPlaty.</p>
-        <p>You can find out more <a class="link" href="https://github.com/mplatypus/platy-paste-frontend">here</a>.</p>
+        <p>
+            You can find out more <a
+                class="link"
+                href="https://github.com/mplatypus/platy-paste-frontend">here</a
+            >.
+        </p>
     </div>
     <div id="q-and-a" class="base-section">
         <a href="#q-and-a"><h3>Q and A's</h3></a>
@@ -23,8 +28,11 @@
     </div>
     <div id="documentation" class="base-section">
         <a href="#documentation"><h3>API Documentation</h3></a>
-        <p>The API Documentation can be found <a class="link" href="/docs">here</a>.</p>
-        
+        <p>
+            The API Documentation can be found <a class="link" href="/docs"
+                >here</a
+            >.
+        </p>
     </div>
 </div>
 

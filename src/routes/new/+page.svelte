@@ -3,34 +3,41 @@
     import HeaderDiv from "$lib/components/header.svelte"
     import autosize from "svelte-autosize"
 
-    import { getAllTypes } from "$lib/types"
+    import { DEFAULT_TYPE, extractNameFromName, getAllTypes } from "$lib/types"
 
-    import type { Document } from "$lib/models/document"
     import { uploadPaste } from "$lib/backend"
     import { PasteResponseError } from "$lib/errors"
+    import type { NewDocument } from "$lib/models/new"
+
+    import linkSymbolLight from "$lib/assets/linkSymbolLight.svg"
 
     function generateDefaultExpiry(): string {
-        var now = new Date();
-        var utcString = now.toISOString().substring(0,19);
-        var year = now.getFullYear();
-        var month = now.getMonth() + 1;
-        var day = now.getDate();
-        var hour = now.getHours();
-        var minute = now.getMinutes();
-        var second = now.getSeconds();
-        var localDatetime = year + "-" +
-                        (month < 10 ? "0" + month.toString() : month) + "-" +
-                        (day < 10 ? "0" + day.toString() : day) + "T" +
-                        (hour < 10 ? "0" + hour.toString() : hour) + ":" +
-                        (minute < 10 ? "0" + minute.toString() : minute) +
-                        utcString.substring(16,19);
-        
+        var now = new Date()
+        var utcString = now.toISOString().substring(0, 19)
+        var year = now.getFullYear()
+        var month = now.getMonth() + 1
+        var day = now.getDate()
+        var hour = now.getHours()
+        var minute = now.getMinutes()
+        var second = now.getSeconds()
+        var localDatetime =
+            year +
+            "-" +
+            (month < 10 ? "0" + month.toString() : month) +
+            "-" +
+            (day < 10 ? "0" + day.toString() : day) +
+            "T" +
+            (hour < 10 ? "0" + hour.toString() : hour) +
+            ":" +
+            (minute < 10 ? "0" + minute.toString() : minute) +
+            utcString.substring(16, 19)
+
         return localDatetime
     }
 
-    let enableExpiry: boolean = false;
-    let expiry: string = generateDefaultExpiry();
-    let documents: Document[] = []
+    let enableExpiry: boolean = false
+    let expiry: string = generateDefaultExpiry()
+    let documents: NewDocument[] = []
 
     // This is run to add a default document to the page.
     newDocument()
@@ -38,24 +45,35 @@
     function newDocument() {
         const newId =
             documents.length > 0
-                ? (
-                      Math.max(...documents.map((d) => Number(d.id))) + 1
-                  ).toString()
-                : "1"
+                ? Math.max(...documents.map((d) => Number(d.id))) + 1
+                : 1
 
         documents = [
             ...documents,
             {
                 id: newId,
-                paste_id: "-1",
-                type: "txt",
+                overrideType: false,
+                type: DEFAULT_TYPE,
                 name: "new.txt",
                 content: "",
             },
         ]
     }
 
-    function deleteDocument(docId: string) {
+    function updateDocumentType(document: NewDocument) {
+        if (document.overrideType) {
+            return
+        }
+
+        const newType = extractNameFromName(document.name)
+        if (!newType) return
+
+        documents = documents.map((d) =>
+            d.id === document.id ? { ...d, type: newType } : d,
+        )
+    }
+
+    function deleteDocument(docId: number) {
         documents = documents.filter((doc) => doc.id !== docId)
     }
 
@@ -70,23 +88,23 @@
     async function submitPaste() {
         if (!validateDocuments()) return
 
-        let exp: number | undefined = undefined;
+        let exp: number | undefined = undefined
         if (enableExpiry) {
-            const localDate = new Date(expiry);
+            const localDate = new Date(expiry)
             const utcTimestamp = Date.UTC(
                 localDate.getFullYear(),
                 localDate.getMonth(),
                 localDate.getDate(),
                 localDate.getHours(),
                 localDate.getMinutes(),
-                localDate.getSeconds()
-            );
+                localDate.getSeconds(),
+            )
 
-            exp = Math.floor(utcTimestamp / 1000);
+            exp = Math.floor(utcTimestamp / 1000)
         }
 
         try {
-            let paste = await uploadPaste(documents, {expiry: exp});
+            let paste = await uploadPaste(documents, { expiry: exp })
 
             goto(`/p/${paste.id}`)
         } catch (err) {
@@ -120,20 +138,22 @@
     <div id="paste-settings">
         <h2 id="paste-settings-header">Paste Settings</h2>
         <div id="expiry-div" class="paste-setting">
-            <h3 id="paste-setting-expiry-header" class="paste-setting-header">Expiry</h3>
+            <h3 id="paste-setting-expiry-header" class="paste-setting-header">
+                Expiry
+            </h3>
             <div id="expiry-settings">
                 <p>Enable Expiry</p>
-            <input
-                id="paste-expiry-enable"
-                type="checkbox"
-                bind:checked={enableExpiry}
-                >
-            <p>Set Expiry</p>
-            <input
-                id="paste-expiry"
-                type="datetime-local"
-                bind:value={expiry}
-                >
+                <input
+                    id="paste-expiry-enable"
+                    type="checkbox"
+                    bind:checked={enableExpiry}
+                />
+                <p>Set Expiry</p>
+                <input
+                    id="paste-expiry"
+                    type="datetime-local"
+                    bind:value={expiry}
+                />
             </div>
         </div>
     </div>
@@ -149,16 +169,29 @@
                         defaultValue="new.txt"
                         max="50"
                         bind:value={doc.name}
+                        on:change={() => updateDocumentType(doc)}
                     />
                     <p id="document-header-title-type">Type:</p>
                     <select
                         id="document-header-title-type-input"
                         bind:value={doc.type}
+                        on:change={() => {
+                            doc.overrideType = true
+                        }}
                     >
                         {#each getAllTypes() as validType}
                             <option>{validType}</option>
                         {/each}
                     </select>
+                    <button
+                        class="document-link-type"
+                        on:click={() => {
+                            doc.overrideType = false
+                            updateDocumentType(doc)
+                        }}
+                    >
+                        <img alt="Link type." src={linkSymbolLight} />
+                    </button>
                 </div>
                 <div class="document-header-buttons">
                     <button
@@ -318,6 +351,17 @@
         background-color: var(--color-gray-500);
         align-items: center;
         height: 95%;
+    }
+
+    .document-link-type {
+        height: 1.5rem;
+        width: 1.5rem;
+    }
+
+    .document-link-type > img {
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
     }
 
     #document-header-title-name-input:focus {

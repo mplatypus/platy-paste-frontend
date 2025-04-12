@@ -5,8 +5,8 @@
     import {
         DEFAULT_SHIKI,
         DEFAULT_TYPE,
-        mimeToShiki,
-        mimeToType,
+        extractNameFromDocument,
+        extractTypeFromDocument,
     } from "$lib/types"
     export let data: { paste: Paste }
 </script>
@@ -28,11 +28,11 @@
             <div class="document-information">
                 <p class="document-information-name">{document.name}</p>
                 <p class="document-information-type">
-                    {mimeToType(document.type) || DEFAULT_TYPE}
+                    {extractNameFromDocument(document) || DEFAULT_TYPE}
                 </p>
             </div>
             <div class="document-content">
-                {#await codeToHtml( document.content, { lang: mimeToShiki(document.type) || DEFAULT_SHIKI, theme: "dracula" }, ) then val}
+                {#await codeToHtml( document.content, { lang: extractTypeFromDocument(document)?.shiki || DEFAULT_SHIKI, theme: "dracula" }, ) then val}
                     {@html val}
                 {/await}
             </div>

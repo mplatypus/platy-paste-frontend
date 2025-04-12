@@ -9,7 +9,6 @@ You can view a live version of platy paste [here](https://paste.mplaty.com/)
 >
 > See [more](#beta).
 
-
 ## Features
 
 Below is a list of features. The checked boxes mean they have been implemented.
@@ -19,7 +18,8 @@ Below is a list of features. The checked boxes mean they have been implemented.
         - [x] Add multiple documents.
         - [ ] Error handling when pastes fail to upload.
         - [ ] Support tab indenting text.
-        - [ ] Support more file types.
+        - [x] Support more file types.
+        - [x] Autodetect file type from name.
         - [x] Expiry support.
     - [x] View
         - [x] View documents.
@@ -29,7 +29,6 @@ Below is a list of features. The checked boxes mean they have been implemented.
     - [ ] Support mobile.
     - [ ] Light / Dark theme.
 - [ ] Proper Error handling.
-
 
 ## Beta
 
@@ -45,12 +44,12 @@ so also do not save passwords or private information.
 no paste can currently be password protected,
 with no certainty this feature will ever happen.)
 
-
 ## Setup
 
 This application is currently built and made for [Cloudflare Pages](https://pages.cloudflare.com/).
 
 ### Step 1
+
 The first step to hosting your own site, is to fork this repository. [**more**](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo)
 
 ### Step 2
@@ -73,6 +72,7 @@ Build output directory: `.svelte-kit/cloudflare`
 You need to at least set the `PUBLIC_API_URL` environment variable for the site to be able to create/view pastes.
 
 Example environment:
+
 ```env
 PUBLIC_API_URL = "https://paste.example.com"
 ```
@@ -83,7 +83,6 @@ You can now build and host the site!
 
 > [!TIP]
 > Make sure the environment variable for the backend that allows CORS bypass matches the site the pastebin is hosted on!
-
 
 ## Important Links
 

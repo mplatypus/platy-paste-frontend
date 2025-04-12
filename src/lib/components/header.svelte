@@ -17,7 +17,11 @@
     </div>
 
     <div id="header-div-button-items" class="header-div-item">
-        <a id="beta-tag" href="https://github.com/mplatypus/platy-paste-frontend?tab=readme-ov-file#beta"><p>beta</p></a>
+        <a
+            id="beta-tag"
+            href="https://github.com/mplatypus/platy-paste-frontend?tab=readme-ov-file#beta"
+            ><p>beta</p></a
+        >
         <button class="header-div-button-item" onclick={new_paste}>new</button>
     </div>
 </div>
