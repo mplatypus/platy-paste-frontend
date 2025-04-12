@@ -193,8 +193,14 @@
                         }}
                     >
                         <picture>
-                            <source srcset={linkSymbolLight} media="(prefers-color-scheme: dark)" />
-                            <source srcset={linkSymbolDark} media="(prefers-color-scheme: light)" />
+                            <source
+                                srcset={linkSymbolLight}
+                                media="(prefers-color-scheme: dark)"
+                            />
+                            <source
+                                srcset={linkSymbolDark}
+                                media="(prefers-color-scheme: light)"
+                            />
                             <img alt="Link type." src={linkSymbolDark} />
                         </picture>
                     </button>
