@@ -7,7 +7,7 @@
 
     import { uploadPaste } from "$lib/backend"
     import { PasteResponseError } from "$lib/errors"
-    import type { NewDocument } from "$lib/models/new"
+    import type { NewDocument } from "$lib/models/document"
 
     import linkSymbolLight from "$lib/assets/linkSymbolLight.svg"
 
