@@ -108,11 +108,11 @@ async function decodeFormData(response: Response): Promise<Paste | null> {
 
     let payload_data = formData.get("payload");
 
-    if (payload_data == null) {
+    if (payload_data == null || !(payload_data instanceof File)) {
         throw new PasteError("Missing payload object.");
     }
 
-    let payload: ResponsePaste = JSON.parse(payload_data.toString())
+    let payload: ResponsePaste = JSON.parse(await payload_data.text())
 
     let documents: Document[] = [];
     for (const document of payload.documents) {
@@ -122,10 +122,11 @@ async function decodeFormData(response: Response): Promise<Paste | null> {
             throw new PasteError(`Content for ${document.id} was not found.`)
         }
 
-        let content = content_data.toString();
-
+        let content: string | null = null
         if (content_data instanceof File) {
             content = await content_data.text();
+        } else {
+            throw new PasteError("Content type is unknown.")
         }
 
         let new_document: Document = {
