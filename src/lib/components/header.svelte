@@ -11,7 +11,7 @@
 <div id="header-div">
     <div id="header-div-main-items" class="header-div-item">
         <a href="/">
-            <img id="header-home-img" src="/logo.png" alt="Logo home" />
+            <img id="header-home-img" src="/favicon.png" alt="Logo home" />
         </a>
         <h1 id="header-content">{content}</h1>
     </div>
@@ -29,7 +29,9 @@
 <style lang="postcss">
     #header-div {
         padding: 0.5rem;
-        margin-bottom: 2.5rem;
+        min-height: fit-content;
+        max-height: max-content;
+        height: 8vh;
         background-color: var(--color-background-header);
         position: sticky;
         top: 0;
@@ -38,6 +40,11 @@
         align-items: center;
         justify-content: space-between;
         z-index: 5;
+    }
+
+    #header-home-img {
+        height: 75%;
+        width: 75%;
     }
 
     .header-div-item {
