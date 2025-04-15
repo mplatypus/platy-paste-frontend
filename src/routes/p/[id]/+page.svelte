@@ -8,7 +8,15 @@
         extractNameFromDocument,
         extractTypeFromDocument,
     } from "$lib/types"
+    import { onMount } from "svelte"
+    import { fetchPaste } from "$lib/backend"
     export let data: { paste: Paste }
+
+    onMount(() => {
+        let paste = fetchPaste(fetch, "7317764729306315903", true)
+
+        console.log(paste)
+    });
 </script>
 
 <svelte:head>
