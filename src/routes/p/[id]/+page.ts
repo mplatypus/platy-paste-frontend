@@ -8,7 +8,7 @@ const SUPPORTED_SNOWFLAKE = RegExp("^\\d{10,}$")
 export const load: PageLoad = async ({ params, fetch }) => {
     if (!SUPPORTED_SNOWFLAKE.test(params.id)) {
         error(400, {
-            message: "Invalid snowflake recieved.",
+            message: "Invalid snowflake received.",
             trace: "The snowflake provided contains invalid characters or is too short.",
             timestamp: null,
             paste_id: params.id,

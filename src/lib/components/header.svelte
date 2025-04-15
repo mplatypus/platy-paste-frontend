@@ -29,14 +29,22 @@
 <style lang="postcss">
     #header-div {
         padding: 0.5rem;
-        background-color: var(--color-gray-950);
-        border-radius: var(--radius-md);
+        min-height: fit-content;
+        max-height: max-content;
+        height: 8vh;
+        background-color: var(--color-background-header);
         position: sticky;
         top: 0;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+        z-index: 5;
+    }
+
+    #header-home-img {
+        height: 75%;
+        width: 75%;
     }
 
     .header-div-item {
@@ -55,7 +63,7 @@
 
     #header-content {
         font-family: quicksand, sans-serif;
-        color: var(--color-white);
+        color: var(--color-text);
         font-size: var(--text-2xl);
         font-weight: 700;
         padding-left: 1rem;
@@ -71,8 +79,11 @@
         margin: 0 0.5rem;
         padding: 0.25rem 1rem;
         border-radius: var(--radius-md);
-        border-style: solid;
-        background-color: var(--color-rose-400);
+        background-color: var(--color-button-primary);
+        color: var(--color-text);
+        font-weight: 400;
+        font-size: var(--text-base);
+        font-style: var(--main-font);
     }
 
     #beta-tag {

@@ -1,9 +1,8 @@
 import { PUBLIC_API_URL } from "$env/static/public"
 import type { Paste } from "./models/paste"
-import type { Document } from "./models/document"
-import { PasteResponseError, type APIError, PasteUploadError } from "./errors"
-import { DEFAULT_MIME, extractTypeFromDocument, getType } from "./types"
+import { PasteResponseError, type APIError, PasteError } from "./errors"
 import type { NewDocument } from "./models/new"
+import { DEFAULT_MIME, getType } from "./types"
 
 const VERSION = 1
 
@@ -78,9 +77,11 @@ export async function uploadPaste(
 
         throw PasteResponseError.fromAPIError(response.status, error)
     } catch (err) {
+        if (err instanceof PasteResponseError) throw err
+
         let message = "Unknown Error"
         if (err instanceof Error) message = err.message
 
-        throw new PasteUploadError(message)
+        throw new PasteError(message)
     }
 }
