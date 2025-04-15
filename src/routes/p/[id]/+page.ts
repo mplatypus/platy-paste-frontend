@@ -6,7 +6,6 @@ import { PasteError, PasteResponseError } from "$lib/errors"
 const SUPPORTED_SNOWFLAKE = RegExp("^\\d{10,}$")
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    const boundFetch = fetch.bind(globalThis);
     if (!SUPPORTED_SNOWFLAKE.test(params.id)) {
         error(400, {
             message: "Invalid snowflake recieved.",
@@ -18,7 +17,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
     let paste
     try {
-        paste = await fetchPaste(boundFetch, params.id, true)
+        paste = await fetchPaste(fetch, params.id, true)
     } catch (err) {
         if (err instanceof PasteError) {
             if (err instanceof PasteResponseError) {
