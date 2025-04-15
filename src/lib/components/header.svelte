@@ -11,7 +11,7 @@
 <div id="header-div">
     <div id="header-div-main-items" class="header-div-item">
         <a href="/">
-            <img id="header-home-img" src="/favicon.png" alt="Logo home" />
+            <img id="header-home-img" src="/logo.png" alt="Logo home" />
         </a>
         <h1 id="header-content">{content}</h1>
     </div>
