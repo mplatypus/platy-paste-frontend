@@ -97,6 +97,7 @@
         justify-content: center;
         align-items: center;
         gap: 4rem;
+        margin-bottom: 5rem;
     }
 
     #title {

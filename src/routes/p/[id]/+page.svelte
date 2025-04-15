@@ -98,6 +98,7 @@
         align-items: center;
         margin-top: 1.5rem;
         gap: 2.5rem;
+        margin-bottom: 5rem;
     }
 
     .document {

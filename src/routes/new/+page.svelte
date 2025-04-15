@@ -251,6 +251,7 @@
         align-items: center;
         margin-top: 1.5rem;
         gap: 2.5rem;
+        margin-bottom: 2.5rem;
     }
 
     #upload-error-message {
@@ -484,10 +485,6 @@
     }
 
     /* Buttons */
-
-    #buttons {
-        margin-bottom: 2.5rem;
-    }
 
     #buttons > button {
         border-radius: var(--radius-md);
