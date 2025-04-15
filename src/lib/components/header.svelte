@@ -29,7 +29,8 @@
 <style lang="postcss">
     #header-div {
         padding: 0.5rem;
-        background-color: var(--color-background);
+        margin-bottom: 2.5rem;
+        background-color: var(--color-background-header);
         position: sticky;
         top: 0;
         display: flex;

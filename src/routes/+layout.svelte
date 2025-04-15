@@ -8,4 +8,10 @@
     <meta name="darkreader-lock" />
 </svelte:head>
 
+<style lang="postcss">
+    :global(html) {
+        background-color: var(--color-background);
+    }
+</style>
+
 {@render children()}
