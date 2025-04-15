@@ -7,6 +7,8 @@
 
     let error = page.error
 
+    console.log("Errors")
+
     let status = page.status
     let message = "Unknown Error"
     let trace = null
