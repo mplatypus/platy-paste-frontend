@@ -125,8 +125,13 @@
 
 <svelte:head>
     <title>New Paste</title>
-    <meta property="og:title" content="Platy Paste" />
-    <meta property="og:description" content="Create a new paste!" />
+    <meta property="og:title" content="New" />
+    <meta property="og:description" content="Make a new paste!" />
+    <meta property="og:site_name" content="Platy Paste" />
+    <meta property="og:image" content="/logo.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="Platy Paste logo" />
+    <meta name="theme-color" content="#1D7C8C" />
 </svelte:head>
 
 <HeaderDiv content="New Paste"></HeaderDiv>

@@ -9,6 +9,7 @@
         extractNameFromDocument,
         extractTypeFromDocument,
     } from "$lib/types"
+    import { PasteError } from "$lib/errors"
     export let data: { paste: Paste }
 
     function copyContent(content: string): null {
@@ -45,11 +46,19 @@
 
 <svelte:head>
     <title>Paste: {data.paste.id}</title>
-    <meta property="og:title" content="Platy Paste" />
+    <meta property="og:title" content="Paste: {data.paste.id}" />
     <meta
         property="og:description"
-        content="A new paste with {data.paste.documents.length} document(s)"
+        content="This paste contains {data.paste.documents
+            .length} document(s){data.paste.edited
+            ? '\n\nThis paste has been modified.'
+            : ''}"
     />
+    <meta property="og:site_name" content="Platy Paste" />
+    <meta property="og:image" content="/logo.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="Platy Paste logo" />
+    <meta name="theme-color" content="#1D7C8C" />
 </svelte:head>
 
 <HeaderDiv content="Paste ID: {String(data.paste.id)}"></HeaderDiv>
