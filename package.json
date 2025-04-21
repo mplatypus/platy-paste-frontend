@@ -11,7 +11,7 @@
         "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
         "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
         "format": "npx prettier --write .",
-        "format-check": "npx prettier --check ."
+        "format-check": "npx prettier --check src/ static/"
     },
     "devDependencies": {
         "@sveltejs/adapter-auto": "^6.0.0",
