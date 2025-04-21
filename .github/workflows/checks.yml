@@ -16,11 +16,7 @@ jobs:
           uses: actions/setup-node@v4
           with:
             node-version: '20'
-        - name: Debug workspace (TEMP)
-          run: |
-              echo "PWD: $(pwd)"
-              ls -1
         - name: Install dependencies
           run: npm ci
-        - name: Run format check
+        - name: Check formatting
           run: npm run format-check
