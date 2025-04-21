@@ -8,6 +8,9 @@ on:
 jobs:
     format:
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: platy-paste-frontend
 
         steps:
             - uses: actions/checkout@v4
@@ -19,4 +22,3 @@ jobs:
             - run: |
                 npm ci
                 npm run format-check
-              working-directory: ./platy-paste-frontend
