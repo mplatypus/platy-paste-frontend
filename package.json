@@ -10,25 +10,26 @@
         "prepare": "svelte-kit sync || echo ''",
         "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
         "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-        "format": "npx prettier --write ."
+        "format": "npx prettier --write .",
+        "format-check": "npx prettier --check ."
     },
     "devDependencies": {
         "@sveltejs/adapter-auto": "^6.0.0",
         "@sveltejs/adapter-cloudflare": "^7.0.0",
-        "@sveltejs/kit": "^2.16.0",
+        "@sveltejs/kit": "^2.20.7",
         "@sveltejs/vite-plugin-svelte": "^5.0.0",
-        "@types/node": "^22.13.11",
+        "@types/node": "^22.14.1",
         "prettier": "^3.5.3",
         "prettier-plugin-svelte": "^3.3.3",
         "shiki": "^3.2.1",
-        "svelte": "^5.0.0",
+        "svelte": "^5.27.0",
         "svelte-check": "^4.0.0",
-        "typescript": "^5.0.0",
+        "typescript": "^5.8.3",
         "vite": "^6.0.0"
     },
     "dependencies": {
         "@material/web": "^2.3.0",
-        "@tailwindcss/vite": "^4.0.15",
+        "@tailwindcss/vite": "^4.1.4",
         "postcss": "^8.5.3",
         "svelte-autosize": "^1.1.5",
         "tailwindcss": "^4.0.15"
