@@ -72,6 +72,7 @@
                     <p class="document-information-type">
                         {extractNameFromDocument(document) || DEFAULT_TYPE}
                     </p>
+                    <p class="document-information-id">{document.id}</p>
                 </div>
                 <button
                     class="document-copy"
@@ -129,15 +130,17 @@
         display: flex;
         flex-direction: row;
         align-items: center;
+        gap: 1rem;
     }
 
-    .document-information-name {
+    .document-information-name,
+    .document-information-id {
         font-size: var(--text-lg);
         font-weight: 500;
+        user-select: all;
     }
 
     .document-information-type {
-        margin-left: 1rem;
         padding: 0.125rem 0.5rem;
         border-radius: var(--radius-sm);
         background-color: var(--color-content-primary);
