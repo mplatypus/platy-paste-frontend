@@ -61,7 +61,11 @@
     <meta name="theme-color" content="#1D7C8C" />
 </svelte:head>
 
-<HeaderDiv content="Paste ID: {String(data.paste.id)}"></HeaderDiv>
+<HeaderDiv>
+    <h1>
+        Paste ID: <span style="user-select: all;">{String(data.paste.id)}</span>
+    </h1>
+</HeaderDiv>
 
 <div id="documents">
     {#each data.paste.documents as document}

@@ -37,7 +37,9 @@
     <title>Error {status}</title>
 </svelte:head>
 
-<HeaderDiv content="Error {status}"></HeaderDiv>
+<HeaderDiv>
+    <h1>Error {status}</h1>
+</HeaderDiv>
 
 <div id="error-div">
     <p id="error" class="error-information">{message}</p>

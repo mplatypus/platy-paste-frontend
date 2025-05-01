@@ -1,6 +1,4 @@
 <script lang="ts">
-    export let content: string
-
     import { goto } from "$app/navigation"
 
     function new_paste() {
@@ -8,46 +6,43 @@
     }
 </script>
 
-<div id="header-div">
-    <div id="header-div-main-items" class="header-div-item">
+<div id="paste-header-div">
+    <div id="paste-header-div-main-items" class="paste-header-div-item">
         <a href="/">
-            <img id="header-home-img" src="/logo.png" alt="Logo home" />
+            <img id="paste-header-home-img" src="/logo.png" alt="Logo home" />
         </a>
-        <h1 id="header-content">{content}</h1>
+        <div id="paste-header-div-main-content">
+            <slot id="paste-header-div-content" />
+        </div>
     </div>
 
-    <div id="header-div-button-items" class="header-div-item">
+    <div id="paste-header-div-button-items" class="paste-header-div-item">
         <a
             id="beta-tag"
             href="https://github.com/mplatypus/platy-paste-frontend?tab=readme-ov-file#beta"
-            ><p>beta</p></a
         >
-        <button class="header-div-button-item" onclick={new_paste}>new</button>
+            <p>beta</p>
+        </a>
+        <button class="paste-header-div-button-item" onclick={new_paste}
+            >new</button
+        >
     </div>
 </div>
 
 <style lang="postcss">
-    #header-div {
+    #paste-header-div {
         padding: 0.5rem;
-        min-height: fit-content;
-        max-height: max-content;
-        height: 8vh;
         background-color: var(--color-background-header);
+        border-radius: var(--radius-md);
         position: sticky;
         top: 0;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        z-index: 5;
     }
 
-    #header-home-img {
-        height: 75%;
-        width: 75%;
-    }
-
-    .header-div-item {
+    .paste-header-div-item {
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -55,35 +50,38 @@
 
     /* header-div-main-items */
 
-    #header-home-img {
+    #paste-header-home-img {
         max-width: 80px;
         max-height: 80px;
         margin: 0;
+        padding: 0 1rem;
     }
 
-    #header-content {
-        font-family: quicksand, sans-serif;
+    #paste-header-div-main-content {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    #paste-header-div-main-content > :global(h1) {
+        font-family: var(--main-font);
         color: var(--color-text);
         font-size: var(--text-2xl);
         font-weight: 700;
-        padding-left: 1rem;
     }
 
     /* header-div-button-items */
 
-    #header-div-button-items {
+    #paste-header-div-button-items {
         pad: 2rem;
     }
 
-    .header-div-button-item {
+    .paste-header-div-button-item {
         margin: 0 0.5rem;
         padding: 0.25rem 1rem;
         border-radius: var(--radius-md);
-        background-color: var(--color-button-primary);
-        color: var(--color-text);
-        font-weight: 400;
-        font-size: var(--text-base);
-        font-style: var(--main-font);
+        border-style: solid;
+        background-color: var(--color-rose-400);
     }
 
     #beta-tag {

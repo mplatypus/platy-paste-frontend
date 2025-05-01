@@ -13,7 +13,9 @@
     <meta name="theme-color" content="#1D7C8C" />
 </svelte:head>
 
-<HeaderDiv content="Home"></HeaderDiv>
+<HeaderDiv>
+    <h1>Home</h1>
+</HeaderDiv>
 
 <div id="base">
     <h1 id="title">Welcome to Platy Paste!</h1>

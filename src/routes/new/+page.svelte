@@ -129,7 +129,9 @@
     <meta name="theme-color" content="#1D7C8C" />
 </svelte:head>
 
-<HeaderDiv content="New Paste"></HeaderDiv>
+<HeaderDiv>
+    <h1>New Paste</h1>
+</HeaderDiv>
 
 <div id="paste">
     <p
