@@ -32,7 +32,7 @@ export async function fetchPaste(
 
 interface UploadPasteSettings {
     content?: boolean
-    expiry?: number
+    expiry?: number | null
 }
 
 export async function uploadPaste(

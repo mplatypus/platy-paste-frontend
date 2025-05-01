@@ -12,6 +12,7 @@
 
     import linkSymbolLight from "$lib/assets/linkSymbolLight.svg"
     import linkSymbolDark from "$lib/assets/linkSymbolDark.svg"
+    import Slider from "$lib/components/slider.svelte"
 
     function generateDefaultExpiry(): string {
         var now = new Date()
@@ -37,7 +38,7 @@
         return localDatetime
     }
 
-    let enableExpiry: boolean = false
+    let expiryState = "default"
     let expiry: string = generateDefaultExpiry()
     let documents: NewDocument[] = []
 
@@ -90,8 +91,8 @@
     async function submitPaste() {
         if (!validateDocuments()) return
 
-        let exp: number | undefined = undefined
-        if (enableExpiry) {
+        let exp: number | null | undefined = undefined
+        if (expiryState === "on") {
             const localDate = new Date(expiry)
             const utcTimestamp = Date.UTC(
                 localDate.getFullYear(),
@@ -103,6 +104,8 @@
             )
 
             exp = Math.floor(utcTimestamp / 1000)
+        } else if (expiryState === "off") {
+            exp = null
         }
 
         try {
@@ -151,14 +154,16 @@
                 Expiry
             </h3>
             <label id="paste-expiry-toggle">
-                <input type="checkbox" bind:checked={enableExpiry} />
-                <span></span>
+                <Slider
+                    options={["off", "default", "on"]}
+                    bind:value={expiryState}
+                />
             </label>
             <input
                 id="paste-expiry"
                 type="datetime-local"
                 bind:value={expiry}
-                readonly={!enableExpiry}
+                readonly={expiryState != "on"}
             />
         </div>
     </div>
@@ -316,56 +321,7 @@
     }
 
     #paste-expiry-toggle {
-        position: relative;
-        display: inline-block;
-        width: 40px;
-        height: 20px;
-    }
-
-    #paste-expiry-toggle > input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    #paste-expiry-toggle > span {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border-radius: 34px;
-        background-color: var(--color-gray-500);
-        -webkit-transition: 0.4s;
-        transition: 0.4s;
-    }
-
-    #paste-expiry-toggle > span:before {
-        position: absolute;
-        content: "";
-        height: 15px;
-        width: 15px;
-        left: 2.5px;
-        bottom: 2.5px;
-        border-radius: 50%;
-        background-color: var(--color-white);
-        -webkit-transition: 0.2s;
-        transition: 0.2s;
-    }
-
-    #paste-expiry-toggle > span:hover {
-        filter: brightness(95%);
-    }
-
-    #paste-expiry-toggle > input:checked + span {
-        background-color: var(--color-button-primary);
-    }
-
-    #paste-expiry-toggle > input:checked + span:before {
-        -webkit-transform: translateX(20px);
-        -ms-transform: translateX(20px);
-        transform: translateX(20px);
+        width: 200px;
     }
 
     #paste-expiry {
