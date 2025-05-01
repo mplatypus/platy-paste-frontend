@@ -94,16 +94,8 @@
         let exp: number | null | undefined = undefined
         if (expiryState === "on") {
             const localDate = new Date(expiry)
-            const utcTimestamp = Date.UTC(
-                localDate.getFullYear(),
-                localDate.getMonth(),
-                localDate.getDate(),
-                localDate.getHours(),
-                localDate.getMinutes(),
-                localDate.getSeconds(),
-            )
 
-            exp = Math.floor(utcTimestamp / 1000)
+            exp = Math.floor(localDate.getTime() / 1000)
         } else if (expiryState === "off") {
             exp = null
         }

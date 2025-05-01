@@ -54,7 +54,11 @@ export async function uploadPaste(
         documents.forEach((doc) => {
             let mime = getType(doc.type)?.mime || DEFAULT_MIME
 
-            formData.append(doc.name, new Blob([doc.content], { type: mime }))
+            formData.append(
+                String(doc.id),
+                new Blob([doc.content], { type: mime }),
+                doc.name,
+            )
         })
 
         let query = ""
