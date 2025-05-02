@@ -25,7 +25,7 @@
 <style>
     .toggle {
         display: flex;
-        width: 100%;
+        width: fit-content;
         background-color: var(--color-button-secondary);
         border-radius: 20px;
         overflow: hidden;
@@ -42,6 +42,8 @@
         cursor: pointer;
         color: var(--color-text);
         font-weight: 700;
+        padding: 0 10px;
+        width: fit-content;
     }
 
     .slider {

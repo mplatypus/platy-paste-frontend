@@ -13,16 +13,24 @@
     import linkSymbolLight from "$lib/assets/linkSymbolLight.svg"
     import linkSymbolDark from "$lib/assets/linkSymbolDark.svg"
     import Slider from "$lib/components/slider.svelte"
+    import type { Config } from "$lib/models/config"
+    export let data: { config: Config }
 
-    function generateDefaultExpiry(): string {
-        var now = new Date()
-        var utcString = now.toISOString().substring(0, 19)
-        var year = now.getFullYear()
-        var month = now.getMonth() + 1
-        var day = now.getDate()
-        var hour = now.getHours()
-        var minute = now.getMinutes()
-        var second = now.getSeconds()
+    function generateDefaultExpiry(
+        default_hours: number | null = null,
+    ): string {
+        var time = new Date()
+
+        if (default_hours != null) {
+            time = new Date(time.getTime() + default_hours * 3600 * 1000)
+        }
+
+        var utcString = time.toISOString().substring(0, 19)
+        var year = time.getFullYear()
+        var month = time.getMonth() + 1
+        var day = time.getDate()
+        var hour = time.getHours()
+        var minute = time.getMinutes()
         var localDatetime =
             year +
             "-" +
@@ -38,8 +46,38 @@
         return localDatetime
     }
 
-    let expiryState = "default"
-    let expiry: string = generateDefaultExpiry()
+    let expiryState: string = ""
+    let expiryOptions: string[] = []
+    let expiry: string = ""
+    if (
+        data.config.default_expiry != null &&
+        data.config.maximum_expiry != null
+    ) {
+        expiryState = "on"
+        expiryOptions = ["on"]
+        expiry = generateDefaultExpiry(data.config.default_expiry)
+    } else if (
+        data.config.default_expiry == null &&
+        data.config.maximum_expiry == null
+    ) {
+        expiryState = "off"
+        expiryOptions = ["off", "on"]
+        expiry = generateDefaultExpiry()
+    } else if (
+        data.config.default_expiry != null &&
+        data.config.maximum_expiry == null
+    ) {
+        expiryState = "on"
+        expiryOptions = ["off", "on"]
+        expiry = generateDefaultExpiry(data.config.default_expiry)
+    } else if (
+        data.config.default_expiry == null &&
+        data.config.maximum_expiry != null
+    ) {
+        expiryState = "on"
+        expiryOptions = ["on"]
+        expiry = generateDefaultExpiry()
+    }
     let documents: NewDocument[] = []
 
     // This is run to add a default document to the page.
@@ -148,10 +186,7 @@
                 Expiry
             </h3>
             <label id="paste-expiry-toggle">
-                <Slider
-                    options={["off", "default", "on"]}
-                    bind:value={expiryState}
-                />
+                <Slider options={expiryOptions} bind:value={expiryState} />
             </label>
             <input
                 id="paste-expiry"
@@ -312,10 +347,6 @@
         justify-content: start;
         align-items: center;
         gap: 0.5rem;
-    }
-
-    #paste-expiry-toggle {
-        width: 200px;
     }
 
     #paste-expiry {

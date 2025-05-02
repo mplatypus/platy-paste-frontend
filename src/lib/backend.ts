@@ -3,6 +3,7 @@ import type { Paste } from "./models/paste"
 import { PasteResponseError, type APIError, PasteError } from "./errors"
 import type { NewDocument } from "./models/new"
 import { DEFAULT_MIME, getType } from "./types"
+import type { Config } from "./models/config"
 
 const VERSION = 1
 
@@ -92,5 +93,19 @@ export async function uploadPaste(
         if (err instanceof Error) message = err.message
 
         throw new PasteError(message)
+    }
+}
+
+/* /config endpoints */
+
+export async function fetchConfig(svelteFetch: typeof fetch): Promise<Config> {
+    let response = await svelteFetch(`${BASE_API_URL}/config`)
+
+    let payload = await response.json()
+
+    if (response.ok) {
+        return payload
+    } else {
+        throw PasteResponseError.fromAPIError(response.status, payload)
     }
 }
