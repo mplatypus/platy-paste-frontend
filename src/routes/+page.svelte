@@ -99,12 +99,12 @@
     }
 
     #base {
+        margin: 0 1rem 5rem;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: center;
+        text-align: center;
         gap: 4rem;
-        margin-bottom: 5rem;
     }
 
     #title {
