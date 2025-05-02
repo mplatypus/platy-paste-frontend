@@ -77,9 +77,13 @@ export async function uploadPaste(
             return await response.json()
         }
 
-        let error: APIError = await response.json()
+        try {
+            let error: APIError = await response.json()
 
-        throw PasteResponseError.fromAPIError(response.status, error)
+            throw PasteResponseError.fromAPIError(response.status, error)
+        } catch {
+            throw new PasteError(response.statusText)
+        }
     } catch (err) {
         if (err instanceof PasteResponseError) throw err
 
