@@ -4,6 +4,11 @@
     function new_paste() {
         goto("/new")
     }
+
+    function beta_redirect() {
+        location.href =
+            "https://github.com/mplatypus/platy-paste-frontend?tab=readme-ov-file#beta"
+    }
 </script>
 
 <div id="paste-header-div">
@@ -15,21 +20,23 @@
             <slot id="paste-header-div-content" />
         </div>
     </div>
-
     <div id="paste-header-div-button-items" class="paste-header-div-item">
-        <a
-            id="beta-tag"
-            href="https://github.com/mplatypus/platy-paste-frontend?tab=readme-ov-file#beta"
-        >
-            <p>beta</p>
-        </a>
-        <button class="paste-header-div-button-item" onclick={new_paste}
-            >new</button
+        <button id="beta-tag" onclick={beta_redirect}> beta </button>
+        <button
+            id="paste-header-div-button-item-new-paste"
+            class="paste-header-div-button-item"
+            onclick={new_paste}>new</button
         >
     </div>
 </div>
 
 <style lang="postcss">
+    :global(button) {
+        font-family: var(--main-font);
+        color: var(--color-text);
+        font-weight: 600;
+    }
+
     #paste-header-div {
         padding: 0.5rem;
         background-color: var(--color-background-header);
@@ -73,15 +80,24 @@
     /* header-div-button-items */
 
     #paste-header-div-button-items {
-        pad: 2rem;
+        display: flex;
+        flex-direction: row;
+        gap: 0.75rem;
     }
 
     .paste-header-div-button-item {
-        margin: 0 0.5rem;
-        padding: 0.25rem 1rem;
+        width: 3rem;
+        height: 2rem;
         border-radius: var(--radius-md);
         border-style: solid;
-        background-color: var(--color-rose-400);
+        background-color: var(--color-button-primary);
+        font-size: large;
+    }
+
+    #beta-tag {
+        width: 3rem;
+        height: 2rem;
+        text-align: center;
     }
 
     #beta-tag {
@@ -89,14 +105,6 @@
         border-style: solid;
         border-width: 0.25rem;
         border-color: var(--color-yellow-500);
-    }
-
-    #beta-tag > p {
-        padding: 0 0.25rem;
-        margin: 0;
-        border: none;
-        font-family: quicksand, sans-serif;
         color: var(--color-yellow-500);
-        font-weight: 600;
     }
 </style>
