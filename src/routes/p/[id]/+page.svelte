@@ -9,16 +9,7 @@
         extractNameFromDocument,
         extractTypeFromDocument,
     } from "$lib/types"
-    import { PasteError } from "$lib/errors"
     export let data: { paste: Paste }
-
-    function copyContent(content: string): null {
-        navigator.clipboard.writeText(content).then(() => {
-            alert("Copied!")
-        })
-
-        return null
-    }
 
     async function convertContent(document: Document): Promise<string> {
         return await codeToHtml(document.content, {
@@ -80,7 +71,18 @@
                 </div>
                 <button
                     class="document-copy"
-                    on:click={() => copyContent(document.content)}>copy</button
+                    onclick={(event: MouseEvent) => {
+                        const button = event.currentTarget as HTMLButtonElement
+                        navigator.clipboard
+                            .writeText(document.content)
+                            .then(() => {
+                                button.classList.add("copied")
+                                setTimeout(
+                                    () => button.classList.remove("copied"),
+                                    500,
+                                )
+                            })
+                    }}>copy</button
                 >
             </div>
             <div class="document-content">
@@ -157,6 +159,11 @@
         height: 2rem;
         margin: 0 0.5rem;
         padding: 0 0.5rem;
+        transition: background-color 0.25s ease-out;
+    }
+
+    :global(.document-copy.copied) {
+        background-color: var(--color-button-secondary);
     }
 
     .document-information > p {
