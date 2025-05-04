@@ -438,7 +438,7 @@
     }
 
     .document-content > textarea {
-        font-size: var(--text-base);
+        font-size: var(--code-size);
         width: 100%;
         min-height: 3em;
         resize: none;

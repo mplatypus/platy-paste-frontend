@@ -35,4 +35,5 @@
 :root {
     --main-font: quicksand, sans-serif;
     --code-font: "Fira Code", monospace;
+    --code-size: 1rem;
 }

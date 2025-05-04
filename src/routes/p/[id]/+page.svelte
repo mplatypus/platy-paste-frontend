@@ -27,7 +27,7 @@
                     line(hast, _) {
                         const existing = hast.properties.style || ""
                         hast.properties.style =
-                            `${existing}; font-family: var(--code-font); font-size: var(--text-base);`.trim()
+                            `${existing}; font-family: var(--code-font); font-size: var(--code-size);`.trim()
                     },
                 },
             ],
