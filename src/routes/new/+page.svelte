@@ -170,6 +170,12 @@
             } else if (err instanceof Error) errorMessage = err.message
         }
     }
+
+    function autoResizeTextarea(event: Event) {
+        const textarea = event.target as HTMLTextAreaElement
+        textarea.style.height = "1.5rem"
+        textarea.style.height = textarea.scrollHeight + 5 + "px"
+    }
 </script>
 
 <svelte:head>
@@ -247,7 +253,10 @@
                 </div>
             </div>
             <div class="document-content">
-                <textarea use:autosize bind:value={doc.content}></textarea>
+                <textarea
+                    bind:value={doc.content}
+                    on:input={(event) => autoResizeTextarea(event)}
+                ></textarea>
             </div>
         </div>
     {/each}
@@ -434,18 +443,20 @@
     /* Document content */
     .document-content {
         background-color: var(--color-content-primary);
-        height: max-content;
+        display: flex;
     }
 
     .document-content > textarea {
+        flex-direction: column;
         font-size: var(--code-size);
         width: 100%;
-        min-height: 3em;
-        resize: none;
-        overflow-y: hidden;
-        padding: 0.5rem;
-        box-sizing: border-box;
+        padding: 0.5rem 0.5rem 1rem;
         line-height: 1.5em;
+        resize: none;
+        white-space: pre;
+        overflow-wrap: normal;
+        overflow-y: hidden;
+        overflow-x: auto;
     }
 
     .document-content > textarea:focus {
@@ -465,5 +476,25 @@
 
     #buttons > button:disabled {
         background-color: var(--color-button-disabled);
+    }
+
+    @layer utilities {
+        .document-content > textarea::-webkit-scrollbar {
+            height: 1rem;
+            width: 1rem;
+        }
+
+        .document-content > textarea::-webkit-scrollbar-track {
+            border-radius: var(--radius-xl);
+        }
+
+        .document-content > textarea::-webkit-scrollbar-thumb {
+            background: var(--color-button-secondary);
+            border-radius: var(--radius-xl);
+        }
+
+        .document-content > textarea::-webkit-scrollbar-thumb:hover {
+            background: var(--color-button-primary);
+        }
     }
 </style>

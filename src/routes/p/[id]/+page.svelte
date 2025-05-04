@@ -187,7 +187,8 @@
 
     @layer utilities {
         .document-content::-webkit-scrollbar {
-            height: 20px;
+            height: 1rem;
+            width: 1rem;
         }
 
         .document-content::-webkit-scrollbar-track {
