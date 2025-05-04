@@ -16,7 +16,7 @@ Below is a list of features. The checked boxes mean they have been implemented.
 - [x] Pages
     - [x] Create
         - [x] Add multiple documents.
-        - [ ] Error handling when pastes fail to upload.
+        - [x] Error handling when pastes fail to upload.
         - [ ] Support tab indenting text.
         - [x] Support more file types.
         - [x] Autodetect file type from name.
@@ -25,10 +25,10 @@ Below is a list of features. The checked boxes mean they have been implemented.
         - [x] View documents.
         - [x] [Shiki](https://shiki.style/) support.
 - [ ] UI
-    - [ ] More consistency. (General theming and UI design)
+    - [x] More consistency. (General theming and UI design)
     - [ ] Support mobile.
-    - [ ] Light / Dark theme.
-- [ ] Proper Error handling.
+    - [x] Light / Dark theme.
+- [x] Proper Error handling.
 
 ## Beta
 
