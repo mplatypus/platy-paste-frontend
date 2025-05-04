@@ -2,16 +2,12 @@
     import { goto } from "$app/navigation"
     import HeaderDiv from "$lib/components/header.svelte"
     import autosize from "svelte-autosize"
-    import { getAllTypes } from "$lib/types"
 
-    import { DEFAULT_TYPE, extractNameFromName } from "$lib/types"
+    import { DEFAULT_TYPE, extractNameFromName, getAllTypes } from "$lib/types"
 
     import { uploadPaste } from "$lib/backend"
     import { PasteResponseError } from "$lib/errors"
     import type { NewDocument } from "$lib/models/new"
-
-    import linkSymbolLight from "$lib/assets/linkSymbolLight.svg"
-    import linkSymbolDark from "$lib/assets/linkSymbolDark.svg"
     import Slider from "$lib/components/slider.svelte"
     import type { Config } from "$lib/models/config"
     export let data: { config: Config }
@@ -93,24 +89,42 @@
             ...documents,
             {
                 id: newId,
-                overrideType: false,
                 type: DEFAULT_TYPE,
                 name: "new.txt",
+                oldName: "new.txt",
                 content: "",
             },
         ]
     }
 
     function updateDocumentType(document: NewDocument) {
-        if (document.overrideType) {
-            return
+        if (document.name == document.oldName) return
+
+        const pattern = RegExp("\.+\\.(?<ext>\\w+)$")
+        const nameRegex = pattern.exec(document.name)
+        const oldNameRegex = pattern.exec(document.oldName)
+
+        let newType = document.type
+        if (
+            nameRegex != null &&
+            nameRegex.groups != null &&
+            oldNameRegex != null &&
+            oldNameRegex.groups != null
+        ) {
+            const ext = nameRegex.groups["ext"]
+            const oldExt = oldNameRegex.groups["ext"]
+
+            if (ext != oldExt) {
+                const extractedType = extractNameFromName(document.name)
+
+                if (extractedType != null) {
+                    newType = extractedType
+                }
+            }
         }
 
-        const newType = extractNameFromName(document.name)
-        if (!newType) return
-
         documents = documents.map((d) =>
-            d.id === document.id ? { ...d, type: newType } : d,
+            d.id === document.id ? { ...d, type: newType, oldName: d.name } : d,
         )
     }
 
@@ -119,7 +133,10 @@
     }
 
     function validateDocuments(): boolean {
-        return documents.every((doc) => doc.content.trim().length > 0)
+        return documents.every(
+            (doc) =>
+                doc.name.trim().length > 0 && doc.content.trim().length > 0,
+        )
     }
 
     let errorMessage = ""
@@ -196,22 +213,23 @@
         <div class="document">
             <div class="document-header">
                 <div class="document-header-title">
-                    <p class="document-header-title-name">Title:</p>
                     <input
                         class="document-header-title-name-input"
+                        title="The name of the document."
                         type="text"
                         defaultValue="new.txt"
-                        max="50"
+                        maxlength="50"
+                        size="15"
                         bind:value={doc.name}
-                        on:change={() => updateDocumentType(doc)}
+                        on:change={() => {
+                            updateDocumentType(doc)
+                        }}
                     />
-                    <p class="document-header-title-type">Type:</p>
+
                     <select
                         class="document-header-title-type-input"
+                        title="The type of the document."
                         bind:value={doc.type}
-                        on:change={() => {
-                            doc.overrideType = true
-                        }}
                     >
                         {#each getAllTypes() as validType}
                             <option selected={doc.type == "txt"}
@@ -219,25 +237,6 @@
                             >
                         {/each}
                     </select>
-                    <button
-                        class="document-link-type"
-                        on:click={() => {
-                            doc.overrideType = false
-                            updateDocumentType(doc)
-                        }}
-                    >
-                        <picture>
-                            <source
-                                srcset={linkSymbolLight}
-                                media="(prefers-color-scheme: dark)"
-                            />
-                            <source
-                                srcset={linkSymbolDark}
-                                media="(prefers-color-scheme: light)"
-                            />
-                            <img alt="Link type." src={linkSymbolDark} />
-                        </picture>
-                    </button>
                 </div>
                 <div class="document-header-buttons">
                     <button
@@ -253,7 +252,11 @@
         </div>
     {/each}
     <div id="buttons">
-        <button on:click={newDocument}>add</button>
+        <button
+            on:click={newDocument}
+            disabled={documents.length >= data.config.maximum_document_count}
+            >add</button
+        >
         <button on:click={submitPaste} disabled={!validateDocuments()}
             >save</button
         >
@@ -392,11 +395,6 @@
         margin-right: 1rem;
     }
 
-    .document-header-title > p {
-        font-size: var(--text-lg);
-        font-weight: 400;
-    }
-
     .document-header-title-name-input,
     .document-header-title-type-input {
         background-color: var(--color-content-primary);
@@ -417,17 +415,6 @@
     .document-header-title-type-input:focus,
     #paste-expiry:focus {
         outline: none;
-    }
-
-    .document-link-type {
-        height: 1.5rem;
-        width: 1.5rem;
-    }
-
-    .document-link-type > picture {
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
     }
 
     .document-header-button-delete {
