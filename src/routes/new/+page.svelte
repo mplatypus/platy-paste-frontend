@@ -381,7 +381,6 @@
         width: 95%;
         background-color: var(--color-header-primary);
         border-radius: var(--radius-xl);
-        overflow: hidden;
     }
 
     .document-header {
@@ -444,6 +443,7 @@
     .document-content {
         background-color: var(--color-content-primary);
         display: flex;
+        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
     }
 
     .document-content > textarea {
