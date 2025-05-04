@@ -122,7 +122,6 @@
         return documents.every((doc) => doc.content.trim().length > 0)
     }
 
-    let err
     let errorMessage = ""
     $: errorIsEmpty = errorMessage.trim() === ""
 
@@ -172,11 +171,7 @@
 </HeaderDiv>
 
 <div id="paste">
-    <p
-        id="upload-error-message"
-        style:display={errorIsEmpty ? "none" : "flex"}
-        bind:this={err}
-    >
+    <p id="upload-error-message" style:display={errorIsEmpty ? "none" : "flex"}>
         {errorMessage}
     </p>
     <div id="paste-settings">
