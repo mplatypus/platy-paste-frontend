@@ -60,7 +60,7 @@
 
 <div id="documents">
     {#each data.paste.documents as document}
-        <div class="document">
+        <div id={document.id} class="document">
             <div class="document-header">
                 <div class="document-information">
                     <p class="document-information-name">{document.name}</p>
@@ -102,7 +102,7 @@
         overflow-x: hidden;
     }
 
-    :global(h1, h2, h3, p) {
+    :global(h1, h2, h3, p, a) {
         font-family: var(--main-font);
         color: var(--color-text);
     }
@@ -121,6 +121,7 @@
         width: 95%;
         background-color: var(--color-header-primary);
         border-radius: var(--radius-xl);
+        scroll-margin-top: 80px;
     }
 
     .document-header {
