@@ -187,7 +187,9 @@
 
         if (nav.type === "leave") nav.cancel()
 
-        if (!confirm("All documents will be deleted if you leave this page.")) {
+        if (
+            !confirm("You will lose all documents if you leave without saving.")
+        ) {
             nav.cancel()
         }
     })
