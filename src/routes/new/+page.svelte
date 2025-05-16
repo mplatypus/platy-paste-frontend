@@ -1,7 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation"
     import HeaderDiv from "$lib/components/header.svelte"
-    import autosize from "svelte-autosize"
 
     import { DEFAULT_TYPE, extractNameFromName, getAllTypes } from "$lib/types"
 
@@ -173,7 +172,7 @@
 
     function autoResizeTextarea(event: Event) {
         const textarea = event.target as HTMLTextAreaElement
-        textarea.style.height = "1.5rem"
+        textarea.style.height = "0.5rem"
         textarea.style.height = textarea.scrollHeight + 5 + "px"
     }
 </script>
@@ -449,8 +448,10 @@
     .document-content > textarea {
         flex-direction: column;
         font-size: var(--code-size);
+        height: 3rem;
         width: 100%;
-        padding: 0.5rem 0.5rem 1rem;
+        padding: 0.25rem 0 1rem;
+        margin: auto 0.25rem;
         line-height: 1.5em;
         resize: none;
         white-space: pre;
