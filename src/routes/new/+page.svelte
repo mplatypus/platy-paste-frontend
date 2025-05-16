@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { goto } from "$app/navigation"
+    import { beforeNavigate, goto } from "$app/navigation"
     import HeaderDiv from "$lib/components/header.svelte"
 
     import { DEFAULT_TYPE, extractNameFromName, getAllTypes } from "$lib/types"
@@ -175,6 +175,22 @@
         textarea.style.height = "0.5rem"
         textarea.style.height = textarea.scrollHeight + 5 + "px"
     }
+
+    beforeNavigate((nav) => {
+        let emptyDocuments = documents.every(
+            (doc) => doc.content.trim().length == 0,
+        )
+
+        if (emptyDocuments) return
+
+        if (nav.type === "goto") return
+
+        if (nav.type === "leave") nav.cancel()
+
+        if (!confirm("All documents will be deleted if you leave this page.")) {
+            nav.cancel()
+        }
+    })
 </script>
 
 <svelte:head>
