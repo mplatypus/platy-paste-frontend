@@ -38,7 +38,7 @@
     }
 
     #paste-header-div {
-        padding: 0.5rem;
+        padding: 0.5rem 2.5%;
         background-color: var(--color-background-header);
         border-radius: var(--radius-md);
         position: sticky;
@@ -58,11 +58,16 @@
 
     /* header-div-main-items */
 
+    #paste-header-div-main-items {
+        gap: 0.75rem;
+    }
+
     #paste-header-home-img {
-        max-width: 80px;
-        max-height: 80px;
+        display: block;
+        width: 50px;
+        height: 50px;
         margin: 0;
-        padding: 0 1rem;
+        padding: 0;
     }
 
     #paste-header-div-main-content {
