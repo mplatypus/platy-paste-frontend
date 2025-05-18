@@ -1,35 +1,45 @@
 <script lang="ts">
-    export let content: string
-
     import { goto } from "$app/navigation"
 
     function new_paste() {
         goto("/new")
     }
+
+    function beta_redirect() {
+        location.href =
+            "https://github.com/mplatypus/platy-paste-frontend?tab=readme-ov-file#beta"
+    }
 </script>
 
-<div id="header-div">
-    <div id="header-div-main-items" class="header-div-item">
+<div id="paste-header-div">
+    <div id="paste-header-div-main-items" class="paste-header-div-item">
         <a href="/">
-            <img id="header-home-img" src="/logo.png" alt="Logo home" />
+            <img id="paste-header-home-img" src="/logo.png" alt="Logo home" />
         </a>
-        <h1 id="header-content">{content}</h1>
+        <div id="paste-header-div-main-content">
+            <slot id="paste-header-div-content" />
+        </div>
     </div>
-
-    <div id="header-div-button-items" class="header-div-item">
-        <a
-            id="beta-tag"
-            href="https://github.com/mplatypus/platy-paste-frontend?tab=readme-ov-file#beta"
-            ><p>beta</p></a
+    <div id="paste-header-div-button-items" class="paste-header-div-item">
+        <button id="beta-tag" onclick={beta_redirect}> beta </button>
+        <button
+            id="paste-header-div-button-item-new-paste"
+            class="paste-header-div-button-item"
+            onclick={new_paste}>new</button
         >
-        <button class="header-div-button-item" onclick={new_paste}>new</button>
     </div>
 </div>
 
 <style lang="postcss">
-    #header-div {
-        padding: 0.5rem;
-        background-color: var(--color-gray-950);
+    :global(button) {
+        font-family: var(--main-font);
+        color: var(--color-text);
+        font-weight: 600;
+    }
+
+    #paste-header-div {
+        padding: 0.5rem 2.5%;
+        background-color: var(--color-background-header);
         border-radius: var(--radius-md);
         position: sticky;
         top: 0;
@@ -37,9 +47,10 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+        z-index: 10;
     }
 
-    .header-div-item {
+    .paste-header-div-item {
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -47,32 +58,52 @@
 
     /* header-div-main-items */
 
-    #header-home-img {
-        max-width: 80px;
-        max-height: 80px;
-        margin: 0;
+    #paste-header-div-main-items {
+        gap: 0.75rem;
     }
 
-    #header-content {
-        font-family: quicksand, sans-serif;
-        color: var(--color-white);
+    #paste-header-home-img {
+        display: block;
+        width: 50px;
+        height: 50px;
+        margin: 0;
+        padding: 0;
+    }
+
+    #paste-header-div-main-content {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    #paste-header-div-main-content > :global(h1) {
+        font-family: var(--main-font);
+        color: var(--color-text);
         font-size: var(--text-2xl);
         font-weight: 700;
-        padding-left: 1rem;
     }
 
     /* header-div-button-items */
 
-    #header-div-button-items {
-        pad: 2rem;
+    #paste-header-div-button-items {
+        display: flex;
+        flex-direction: row;
+        gap: 0.75rem;
     }
 
-    .header-div-button-item {
-        margin: 0 0.5rem;
-        padding: 0.25rem 1rem;
+    .paste-header-div-button-item {
+        width: 3rem;
+        height: 2rem;
         border-radius: var(--radius-md);
         border-style: solid;
-        background-color: var(--color-rose-400);
+        background-color: var(--color-button-primary);
+        font-size: large;
+    }
+
+    #beta-tag {
+        width: 3rem;
+        height: 2rem;
+        text-align: center;
     }
 
     #beta-tag {
@@ -80,14 +111,6 @@
         border-style: solid;
         border-width: 0.25rem;
         border-color: var(--color-yellow-500);
-    }
-
-    #beta-tag > p {
-        padding: 0 0.25rem;
-        margin: 0;
-        border: none;
-        font-family: quicksand, sans-serif;
         color: var(--color-yellow-500);
-        font-weight: 600;
     }
 </style>
