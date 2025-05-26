@@ -41,7 +41,7 @@
     <meta
         property="og:description"
         content="This paste contains {data.paste.documents
-            .length} document(s){data.paste.edited
+            .length} document(s){data.paste.edited_timestamp
             ? '\n\nThis paste has been modified.'
             : ''}"
     />

@@ -44,7 +44,7 @@ export async function uploadPaste(
         const formData = new FormData()
 
         let payload = {
-            expiry: settings.expiry,
+            expiry_timestamp: settings.expiry,
         }
 
         formData.append(
