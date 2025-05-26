@@ -1,23 +1,12 @@
 import { error } from "@sveltejs/kit"
 import type { PageLoad } from "./$types"
-import { fetchPaste } from "$lib/backend"
+import { fetchConfig } from "$lib/backend"
 import { PasteError, PasteResponseError } from "$lib/errors"
 
-const SUPPORTED_SNOWFLAKE = RegExp("^\\d{10,}$")
-
-export const load: PageLoad = async ({ params, fetch }) => {
-    if (!SUPPORTED_SNOWFLAKE.test(params.id)) {
-        error(400, {
-            message: "Invalid snowflake received.",
-            trace: "The snowflake provided contains invalid characters or is too short.",
-            timestamp: null,
-            paste_id: params.id,
-        })
-    }
-
-    let paste
+export const load: PageLoad = async ({ fetch }) => {
+    let config
     try {
-        paste = await fetchPaste(fetch, params.id, true)
+        config = await fetchConfig(fetch)
     } catch (err) {
         if (err instanceof PasteError) {
             if (err instanceof PasteResponseError) {
@@ -25,14 +14,14 @@ export const load: PageLoad = async ({ params, fetch }) => {
                     message: err.message,
                     trace: err.trace,
                     timestamp: err.timestamp,
-                    paste_id: params.id,
+                    paste_id: null,
                 })
             }
             return error(501, {
                 message: err.message,
                 trace: null,
                 timestamp: null,
-                paste_id: params.id,
+                paste_id: null,
             })
         }
 
@@ -43,18 +32,18 @@ export const load: PageLoad = async ({ params, fetch }) => {
             message: message,
             trace: null,
             timestamp: null,
-            paste_id: params.id,
+            paste_id: null,
         })
     }
 
-    if (paste == null) {
+    if (config == null) {
         return error(404, {
             message: "Paste Not Found.",
             trace: "The paste provided could not be found.",
             timestamp: null,
-            paste_id: params.id,
+            paste_id: null,
         })
     }
 
-    return { paste: paste }
+    return { config: config }
 }
