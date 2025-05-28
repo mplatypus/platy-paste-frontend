@@ -45,29 +45,33 @@
     let expiryOptions: string[] = []
     let expiry: string = ""
     if (
-        data.config.default_expiry != null &&
-        data.config.maximum_expiry != null
+        data.config.defaults.expiry_hours != null &&
+        (data.config.size_limits.minimum_expiry_hours != null ||
+            data.config.size_limits.maximum_expiry_hours != null)
     ) {
         expiryState = "on"
         expiryOptions = ["on"]
-        expiry = generateDefaultExpiry(data.config.default_expiry)
+        expiry = generateDefaultExpiry(data.config.defaults.expiry_hours)
     } else if (
-        data.config.default_expiry == null &&
-        data.config.maximum_expiry == null
+        data.config.defaults.expiry_hours == null &&
+        (data.config.size_limits.minimum_expiry_hours == null ||
+            data.config.size_limits.maximum_expiry_hours == null)
     ) {
         expiryState = "off"
         expiryOptions = ["off", "on"]
         expiry = generateDefaultExpiry()
     } else if (
-        data.config.default_expiry != null &&
-        data.config.maximum_expiry == null
+        data.config.defaults.expiry_hours != null &&
+        (data.config.size_limits.minimum_expiry_hours == null ||
+            data.config.size_limits.maximum_expiry_hours == null)
     ) {
         expiryState = "on"
         expiryOptions = ["off", "on"]
-        expiry = generateDefaultExpiry(data.config.default_expiry)
+        expiry = generateDefaultExpiry(data.config.defaults.expiry_hours)
     } else if (
-        data.config.default_expiry == null &&
-        data.config.maximum_expiry != null
+        data.config.defaults.expiry_hours == null &&
+        (data.config.size_limits.minimum_expiry_hours != null ||
+            data.config.size_limits.maximum_expiry_hours != null)
     ) {
         expiryState = "on"
         expiryOptions = ["on"]
@@ -280,10 +284,15 @@
     <div id="buttons">
         <button
             on:click={newDocument}
-            disabled={documents.length >= data.config.maximum_document_count}
+            disabled={documents.length >=
+                data.config.size_limits.maximum_total_document_count}
             >add</button
         >
-        <button on:click={submitPaste} disabled={!validateDocuments()}
+        <button
+            on:click={submitPaste}
+            disabled={!validateDocuments() ||
+                documents.length <
+                    data.config.size_limits.minimum_total_document_count}
             >save</button
         >
     </div>
