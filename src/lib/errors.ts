@@ -69,7 +69,7 @@ export class PasteResponseError extends PasteError {
         this.reason = reason
         this.trace = trace
         this.timestamp = timestamp
-        Object.setPrototypeOf(this, PasteError.prototype)
+        Object.setPrototypeOf(this, PasteResponseError.prototype)
     }
 
     /**
@@ -106,6 +106,6 @@ export class PasteUploadError extends PasteError {
     constructor(reason: string) {
         super(`Upload Failed: ${reason}`)
         this.name = "PasteUploadError"
-        Object.setPrototypeOf(this, PasteError.prototype)
+        Object.setPrototypeOf(this, PasteUploadError.prototype)
     }
 }

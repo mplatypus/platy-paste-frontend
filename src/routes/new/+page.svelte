@@ -1,25 +1,31 @@
 <script lang="ts">
-    import { goto } from "$app/navigation"
+    import { beforeNavigate, goto } from "$app/navigation"
     import HeaderDiv from "$lib/components/header.svelte"
-    import autosize from "svelte-autosize"
 
     import { DEFAULT_TYPE, extractNameFromName, getAllTypes } from "$lib/types"
 
     import { uploadPaste } from "$lib/backend"
     import { PasteResponseError } from "$lib/errors"
     import type { NewDocument } from "$lib/models/new"
+    import Slider from "$lib/components/slider.svelte"
+    import type { Config } from "$lib/models/config"
+    export let data: { config: Config }
 
-    import linkSymbolLight from "$lib/assets/linkSymbolLight.svg"
+    function generateDefaultExpiry(
+        default_hours: number | null = null,
+    ): string {
+        var time = new Date()
 
-    function generateDefaultExpiry(): string {
-        var now = new Date()
-        var utcString = now.toISOString().substring(0, 19)
-        var year = now.getFullYear()
-        var month = now.getMonth() + 1
-        var day = now.getDate()
-        var hour = now.getHours()
-        var minute = now.getMinutes()
-        var second = now.getSeconds()
+        if (default_hours != null) {
+            time = new Date(time.getTime() + default_hours * 3600 * 1000)
+        }
+
+        var utcString = time.toISOString().substring(0, 19)
+        var year = time.getFullYear()
+        var month = time.getMonth() + 1
+        var day = time.getDate()
+        var hour = time.getHours()
+        var minute = time.getMinutes()
         var localDatetime =
             year +
             "-" +
@@ -35,8 +41,42 @@
         return localDatetime
     }
 
-    let enableExpiry: boolean = false
-    let expiry: string = generateDefaultExpiry()
+    let expiryState: string = ""
+    let expiryOptions: string[] = []
+    let expiry: string = ""
+    if (
+        data.config.defaults.expiry_hours != null &&
+        (data.config.size_limits.minimum_expiry_hours != null ||
+            data.config.size_limits.maximum_expiry_hours != null)
+    ) {
+        expiryState = "on"
+        expiryOptions = ["on"]
+        expiry = generateDefaultExpiry(data.config.defaults.expiry_hours)
+    } else if (
+        data.config.defaults.expiry_hours == null &&
+        (data.config.size_limits.minimum_expiry_hours == null ||
+            data.config.size_limits.maximum_expiry_hours == null)
+    ) {
+        expiryState = "off"
+        expiryOptions = ["off", "on"]
+        expiry = generateDefaultExpiry()
+    } else if (
+        data.config.defaults.expiry_hours != null &&
+        (data.config.size_limits.minimum_expiry_hours == null ||
+            data.config.size_limits.maximum_expiry_hours == null)
+    ) {
+        expiryState = "on"
+        expiryOptions = ["off", "on"]
+        expiry = generateDefaultExpiry(data.config.defaults.expiry_hours)
+    } else if (
+        data.config.defaults.expiry_hours == null &&
+        (data.config.size_limits.minimum_expiry_hours != null ||
+            data.config.size_limits.maximum_expiry_hours != null)
+    ) {
+        expiryState = "on"
+        expiryOptions = ["on"]
+        expiry = generateDefaultExpiry()
+    }
     let documents: NewDocument[] = []
 
     // This is run to add a default document to the page.
@@ -52,24 +92,42 @@
             ...documents,
             {
                 id: newId,
-                overrideType: false,
                 type: DEFAULT_TYPE,
                 name: "new.txt",
+                oldName: "new.txt",
                 content: "",
             },
         ]
     }
 
     function updateDocumentType(document: NewDocument) {
-        if (document.overrideType) {
-            return
+        if (document.name == document.oldName) return
+
+        const pattern = RegExp("\.+\\.(?<ext>\\w+)$")
+        const nameRegex = pattern.exec(document.name)
+        const oldNameRegex = pattern.exec(document.oldName)
+
+        let newType = document.type
+        if (
+            nameRegex != null &&
+            nameRegex.groups != null &&
+            oldNameRegex != null &&
+            oldNameRegex.groups != null
+        ) {
+            const ext = nameRegex.groups["ext"]
+            const oldExt = oldNameRegex.groups["ext"]
+
+            if (ext != oldExt) {
+                const extractedType = extractNameFromName(document.name)
+
+                if (extractedType != null) {
+                    newType = extractedType
+                }
+            }
         }
 
-        const newType = extractNameFromName(document.name)
-        if (!newType) return
-
         documents = documents.map((d) =>
-            d.id === document.id ? { ...d, type: newType } : d,
+            d.id === document.id ? { ...d, type: newType, oldName: d.name } : d,
         )
     }
 
@@ -78,21 +136,25 @@
     }
 
     function validateDocuments(): boolean {
-        return documents.every((doc) => doc.content.trim().length > 0)
+        return documents.every(
+            (doc) =>
+                doc.name.trim().length > 0 && doc.content.trim().length > 0,
+        )
     }
 
-    let err
     let errorMessage = ""
-    $: errorIsEmpty = !errorMessage.trim()
+    $: errorIsEmpty = errorMessage.trim() === ""
 
     async function submitPaste() {
         if (!validateDocuments()) return
 
-        let exp: number | undefined = undefined
-        if (enableExpiry) {
+        let exp: number | null | undefined = undefined
+        if (expiryState === "on") {
             const localDate = new Date(expiry)
 
             exp = Math.floor(localDate.getTime() / 1000)
+        } else if (expiryState === "off") {
+            exp = null
         }
 
         try {
@@ -100,53 +162,77 @@
 
             goto(`/p/${paste.id}`)
         } catch (err) {
-            let message = "Unknown Error"
-
-            if (err instanceof Error) message = err.message
+            errorMessage = "Unknown Error"
 
             if (err instanceof PasteResponseError) {
-                if (err.trace) message = err.trace
-                message = err.reason
-            }
+                if (err.trace) {
+                    errorMessage = err.trace
+                } else {
+                    errorMessage = err.reason
+                }
+            } else if (err instanceof Error) errorMessage = err.message
         }
     }
+
+    function autoResizeTextarea(event: Event) {
+        const textarea = event.target as HTMLTextAreaElement
+        textarea.style.height = "0.5rem"
+        textarea.style.height = textarea.scrollHeight + 5 + "px"
+    }
+
+    beforeNavigate((nav) => {
+        let emptyDocuments = documents.every(
+            (doc) => doc.content.trim().length == 0,
+        )
+
+        if (emptyDocuments) return
+
+        if (nav.type === "goto") return
+
+        if (nav.type === "leave") nav.cancel()
+
+        if (
+            !confirm("You will lose all documents if you leave without saving.")
+        ) {
+            nav.cancel()
+        }
+    })
 </script>
 
 <svelte:head>
     <title>New Paste</title>
-    <meta property="og:title" content="Platy Paste" />
-    <meta property="og:description" content="Create a new paste!" />
+    <meta property="og:title" content="New" />
+    <meta property="og:description" content="Make a new paste!" />
+    <meta property="og:site_name" content="Platy Paste" />
+    <meta property="og:image" content="/logo.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="Platy Paste logo" />
+    <meta name="theme-color" content="#1D7C8C" />
 </svelte:head>
 
-<HeaderDiv content="New Paste"></HeaderDiv>
-
-<p
-    id="upload-error-message"
-    class:error-is-empty={errorIsEmpty}
-    bind:this={err}
-></p>
+<HeaderDiv>
+    <h1>New Paste</h1>
+</HeaderDiv>
 
 <div id="paste">
+    <p id="upload-error-message" style:display={errorIsEmpty ? "none" : "flex"}>
+        {errorMessage}
+    </p>
     <div id="paste-settings">
         <h2 id="paste-settings-header">Paste Settings</h2>
         <div id="expiry-div" class="paste-setting">
             <h3 id="paste-setting-expiry-header" class="paste-setting-header">
                 Expiry
             </h3>
-            <div id="expiry-settings">
-                <p>Enable Expiry</p>
-                <input
-                    id="paste-expiry-enable"
-                    type="checkbox"
-                    bind:checked={enableExpiry}
-                />
-                <p>Set Expiry</p>
-                <input
-                    id="paste-expiry"
-                    type="datetime-local"
-                    bind:value={expiry}
-                />
-            </div>
+            <label id="paste-expiry-toggle">
+                <Slider options={expiryOptions} bind:value={expiryState} />
+            </label>
+            <input
+                id="paste-expiry"
+                type="datetime-local"
+                bind:value={expiry}
+                readonly={expiryState != "on"}
+            />
         </div>
     </div>
 
@@ -154,36 +240,30 @@
         <div class="document">
             <div class="document-header">
                 <div class="document-header-title">
-                    <p id="document-header-title-name">Title:</p>
                     <input
-                        id="document-header-title-name-input"
+                        class="document-header-title-name-input"
+                        title="The name of the document."
                         type="text"
                         defaultValue="new.txt"
-                        max="50"
+                        maxlength="50"
+                        size="15"
                         bind:value={doc.name}
-                        on:change={() => updateDocumentType(doc)}
-                    />
-                    <p id="document-header-title-type">Type:</p>
-                    <select
-                        id="document-header-title-type-input"
-                        bind:value={doc.type}
                         on:change={() => {
-                            doc.overrideType = true
-                        }}
-                    >
-                        {#each getAllTypes() as validType}
-                            <option>{validType}</option>
-                        {/each}
-                    </select>
-                    <button
-                        class="document-link-type"
-                        on:click={() => {
-                            doc.overrideType = false
                             updateDocumentType(doc)
                         }}
+                    />
+
+                    <select
+                        class="document-header-title-type-input"
+                        title="The type of the document."
+                        bind:value={doc.type}
                     >
-                        <img alt="Link type." src={linkSymbolLight} />
-                    </button>
+                        {#each getAllTypes() as validType}
+                            <option selected={doc.type == "txt"}
+                                >{validType}</option
+                            >
+                        {/each}
+                    </select>
                 </div>
                 <div class="document-header-buttons">
                     <button
@@ -194,13 +274,25 @@
                 </div>
             </div>
             <div class="document-content">
-                <textarea use:autosize bind:value={doc.content}></textarea>
+                <textarea
+                    bind:value={doc.content}
+                    on:input={(event) => autoResizeTextarea(event)}
+                ></textarea>
             </div>
         </div>
     {/each}
     <div id="buttons">
-        <button on:click={newDocument}>add</button>
-        <button on:click={submitPaste} disabled={!validateDocuments()}
+        <button
+            on:click={newDocument}
+            disabled={documents.length >=
+                data.config.size_limits.maximum_total_document_count}
+            >add</button
+        >
+        <button
+            on:click={submitPaste}
+            disabled={!validateDocuments() ||
+                documents.length <
+                    data.config.size_limits.minimum_total_document_count}
             >save</button
         >
     </div>
@@ -209,34 +301,19 @@
 <style lang="postcss">
     @reference "tailwindcss";
 
-    :global(h1, h2, h3, p, input) {
-        font-family: quicksand, sans-serif;
-        color: var(--color-white);
+    :global(h1, h2, h3, p) {
+        font-family: var(--main-font);
+        color: var(--color-text);
+    }
+
+    :global(textarea, input, select, option) {
+        font-family: var(--code-font);
+        color: var(--color-text);
     }
 
     :global(html) {
-        background-color: theme(--color-black);
+        background-color: var(--color-background);
         overflow-x: hidden;
-    }
-
-    #upload-error-message {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: var(--color-red-400);
-        font-family: quicksand, sans-serif;
-        border-radius: var(--radius-md);
-        padding: 0.25rem 0.5rem;
-    }
-
-    .error-is-empty {
-        margin: 0;
-        padding: 0;
-        height: 0;
-        width: 0;
-        display: none;
-        visibility: none;
     }
 
     #paste {
@@ -244,25 +321,48 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 2rem;
+        margin-top: 1.5rem;
+        gap: 2.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    #upload-error-message {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--color-danger-primary);
+        font-family: quicksand, sans-serif;
+        border-radius: var(--radius-xl);
+        padding: 0.25rem 0.5rem;
+
+        width: 95%;
+        font-size: var(--text-xl);
+        font-weight: 600;
     }
 
     #paste-settings {
+        background-color: var(--color-header-primary);
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         width: 95%;
         gap: 0.5rem;
-        padding: 1rem 0;
-        background-color: var(--color-gray-700);
-        border-radius: var(--radius-md);
-        border: 0.25rem solid var(--color-white);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+    }
+
+    .paste-setting {
+        background-color: var(--color-content-primary);
+        width: 100%;
+        padding: 0.5rem;
     }
 
     #paste-settings-header {
         font-size: var(--text-xl);
         font-weight: 700;
+        padding-top: 0.5rem;
     }
 
     .paste-setting {
@@ -276,55 +376,49 @@
 
     #expiry-div {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    #expiry-settings {
-        display: flex;
         flex-direction: row;
-        justify-content: center;
+        justify-content: start;
         align-items: center;
         gap: 0.5rem;
     }
 
-    #paste-expiry-enable {
-        color: var(--color-white);
+    #paste-expiry {
+        color: var(--color-text);
         border: none;
         border-radius: var(--radius-md);
         background-color: var(--color-gray-500);
         align-items: center;
         height: 95%;
+        -webkit-transition: 0.2s;
+        transition: 0.2s;
     }
 
-    #paste-expiry {
-        color: var(--color-white);
-        border: none;
-        border-radius: var(--radius-md);
-        background-color: var(--color-gray-500);
-        align-items: center;
-        height: 95%;
+    #paste-expiry:hover:not(:read-only) {
+        filter: brightness(95%);
+    }
+
+    #paste-expiry:read-only {
+        background-color: var(--color-gray-600);
+        pointer-events: none;
+        opacity: 0.6;
     }
 
     .document {
         width: 95%;
-        background-color: var(--color-gray-700);
-        border-radius: var(--radius-md);
-        border: 0.25rem solid var(--color-white);
+        background-color: var(--color-header-primary);
+        border-radius: var(--radius-xl);
     }
 
-    /* Document Header */
     .document-header {
-        height: 2.5rem;
+        height: 3rem;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+        padding: 0 0.5rem;
     }
 
     .document-header-title {
-        background-color: var(--color-gray-700);
         border-radius: var(--radius-md);
         display: flex;
         flex-direction: row;
@@ -335,60 +429,62 @@
         margin-right: 1rem;
     }
 
-    #document-header-title-name-input,
-    #document-header-title-type-input {
-        color: var(--color-white);
+    .document-header-title-name-input,
+    .document-header-title-type-input {
+        background-color: var(--color-content-primary);
+        color: var(--color-text);
         border: none;
         border-radius: var(--radius-md);
-        background-color: var(--color-gray-500);
         align-items: center;
-        height: 95%;
+        font-size: var(--text-lg);
+        transition: 0.2s;
     }
 
-    .document-link-type {
-        height: 1.5rem;
-        width: 1.5rem;
+    .document-header-title-name-input:hover,
+    .document-header-title-type-input:hover {
+        filter: brightness(120%);
     }
 
-    .document-link-type > img {
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
-    }
-
-    #document-header-title-name-input:focus {
+    .document-header-title-name-input:focus,
+    .document-header-title-type-input:focus,
+    #paste-expiry:focus {
         outline: none;
     }
 
     .document-header-button-delete {
+        background-color: var(--color-danger-primary);
+        color: var(--color-text);
         border-radius: var(--radius-md);
-
-        color: white;
         height: 2rem;
         margin: 0 0.5rem;
         padding: 0 0.5rem;
     }
 
     .document-header-button-delete:disabled {
-        background-color: var(--color-red-400);
+        background-color: var(--color-danger-disabled);
+        cursor: not-allowed;
     }
 
     /* Document content */
     .document-content {
-        background-color: var(--color-black);
-        height: max-content;
+        background-color: var(--color-content-primary);
+        display: flex;
+        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
     }
 
     .document-content > textarea {
-        border-radius: var(--radius-md);
-        color: white;
+        flex-direction: column;
+        font-size: var(--code-size);
+        height: 3rem;
         width: 100%;
-        min-height: 3em;
-        resize: none;
-        overflow-y: hidden;
-        padding: 0.5rem;
-        box-sizing: border-box;
+        padding: 0.25rem 0 1rem;
+        margin: auto 0.25rem;
         line-height: 1.5em;
+        resize: none;
+        white-space: pre;
+        overflow-wrap: normal;
+        overflow-y: hidden;
+        overflow-x: auto;
     }
 
     .document-content > textarea:focus {
@@ -399,14 +495,34 @@
 
     #buttons > button {
         border-radius: var(--radius-md);
-        background-color: var(--color-red-600);
-        color: white;
+        background-color: var(--color-button-primary);
+        color: var(--color-text);
         height: 2rem;
         margin: 0 0.5rem;
         padding: 0 0.5rem;
     }
 
     #buttons > button:disabled {
-        background-color: var(--color-red-400);
+        background-color: var(--color-button-disabled);
+    }
+
+    @layer utilities {
+        .document-content > textarea::-webkit-scrollbar {
+            height: 1rem;
+            width: 1rem;
+        }
+
+        .document-content > textarea::-webkit-scrollbar-track {
+            border-radius: var(--radius-xl);
+        }
+
+        .document-content > textarea::-webkit-scrollbar-thumb {
+            background: var(--color-button-secondary);
+            border-radius: var(--radius-xl);
+        }
+
+        .document-content > textarea::-webkit-scrollbar-thumb:hover {
+            background: var(--color-button-primary);
+        }
     }
 </style>

@@ -1,9 +1,9 @@
 import { PUBLIC_API_URL } from "$env/static/public"
 import type { Paste } from "./models/paste"
-import type { Document } from "./models/document"
-import { PasteResponseError, type APIError, PasteUploadError } from "./errors"
-import { DEFAULT_MIME, extractTypeFromDocument, getType } from "./types"
+import { PasteResponseError, type APIError, PasteError } from "./errors"
 import type { NewDocument } from "./models/new"
+import { DEFAULT_MIME, getType } from "./types"
+import type { Config } from "./models/config"
 
 const VERSION = 1
 
@@ -33,7 +33,7 @@ export async function fetchPaste(
 
 interface UploadPasteSettings {
     content?: boolean
-    expiry?: number
+    expiry?: number | null
 }
 
 export async function uploadPaste(
@@ -44,7 +44,7 @@ export async function uploadPaste(
         const formData = new FormData()
 
         let payload = {
-            expiry: settings.expiry,
+            expiry_timestamp: settings.expiry,
         }
 
         formData.append(
@@ -78,13 +78,34 @@ export async function uploadPaste(
             return await response.json()
         }
 
-        let error: APIError = await response.json()
+        let error: APIError
+        try {
+            error = await response.json()
+        } catch {
+            throw new PasteError(response.statusText)
+        }
 
         throw PasteResponseError.fromAPIError(response.status, error)
     } catch (err) {
+        if (err instanceof PasteResponseError) throw err
+
         let message = "Unknown Error"
         if (err instanceof Error) message = err.message
 
-        throw new PasteUploadError(message)
+        throw new PasteError(message)
+    }
+}
+
+/* /config endpoints */
+
+export async function fetchConfig(svelteFetch: typeof fetch): Promise<Config> {
+    let response = await svelteFetch(`${BASE_API_URL}/config`)
+
+    let payload = await response.json()
+
+    if (response.ok) {
+        return payload
+    } else {
+        throw PasteResponseError.fromAPIError(response.status, payload)
     }
 }
