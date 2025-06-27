@@ -1,0 +1,13 @@
+name: Checks
+
+on:
+    release:
+        types: [released]
+
+jobs:
+    format:
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Trigger deployment
+          run: curl -X POST ${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}
