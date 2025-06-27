@@ -2,8 +2,6 @@
 
 The front end that can be used to create, and view pastes!
 
-You can view a live version of platy paste [here](https://paste.mplaty.com/)
-
 > [!WARNING]
 > This project is currently in beta.
 >
