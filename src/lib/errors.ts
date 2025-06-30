@@ -32,6 +32,25 @@ export class PasteError extends Error {
 }
 
 /**
+ * Paste CDN Error
+ *
+ * @remarks
+ * This is a response from the backend when the CDN sends an error.
+ *
+ * @param message - The message that will be shown in the error.
+ */
+export class PasteCDNError extends PasteError {
+    status: number
+
+    constructor(status: number, message: string) {
+        super(message)
+        this.status = status
+        this.name = "PasteCDNError"
+        Object.setPrototypeOf(this, PasteCDNError.prototype)
+    }
+}
+
+/**
  * Paste Response Error.
  *
  * @remarks

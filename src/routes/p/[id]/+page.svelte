@@ -9,10 +9,13 @@
         extractNameFromDocument,
         extractTypeFromDocument,
     } from "$lib/types"
-    export let data: { paste: Paste }
+    export let data: { paste: Paste; contents: Record<string, string> }
 
-    async function convertContent(document: Document): Promise<string> {
-        return await codeToHtml(document.content, {
+    async function convertContent(
+        document: Document,
+        content: string,
+    ): Promise<string> {
+        return await codeToHtml(content, {
             lang: extractTypeFromDocument(document)?.shiki || DEFAULT_SHIKI,
             theme: "dracula",
             transformers: [
@@ -74,7 +77,7 @@
                     onclick={(event: MouseEvent) => {
                         const button = event.currentTarget as HTMLButtonElement
                         navigator.clipboard
-                            .writeText(document.content)
+                            .writeText(data.contents[document.id])
                             .then(() => {
                                 button.classList.add("copied")
                                 setTimeout(
@@ -86,7 +89,7 @@
                 >
             </div>
             <div class="document-content">
-                {#await convertContent(document) then val}
+                {#await convertContent(document, data.contents[document.id]) then val}
                     {@html val}
                 {/await}
             </div>
