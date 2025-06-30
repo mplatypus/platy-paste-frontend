@@ -1,13 +1,21 @@
-import { PUBLIC_API_URL } from "$env/static/public"
+import { PUBLIC_API_URL, PUBLIC_CDN_URL } from "$env/static/public"
 import type { Paste } from "./models/paste"
-import { PasteResponseError, type APIError, PasteError } from "./errors"
+import {
+    PasteResponseError,
+    type APIError,
+    PasteError,
+    PasteCDNError,
+} from "./errors"
 import type { NewDocument } from "./models/new"
 import { DEFAULT_MIME, getType } from "./types"
 import type { Config } from "./models/config"
+import type { Document } from "./models/document"
 
 const VERSION = 1
 
 const BASE_API_URL = `${PUBLIC_API_URL.trim().replace(/\/$/, "")}/v${VERSION}`
+
+const BASE_CDN_URL = `${PUBLIC_CDN_URL.trim().replace(/\/$/, "")}`
 
 /* /paste endpoints */
 
@@ -107,5 +115,24 @@ export async function fetchConfig(svelteFetch: typeof fetch): Promise<Config> {
         return payload
     } else {
         throw PasteResponseError.fromAPIError(response.status, payload)
+    }
+}
+
+/* CDN endpoints */
+
+export async function fetchDocumentContent(
+    svelteFetch: typeof fetch,
+    document: Document,
+): Promise<string> {
+    let response = await svelteFetch(
+        `${BASE_CDN_URL}/documents/${document.paste_id}/${document.id}/${document.name}`,
+    )
+
+    let content = await response.text()
+
+    if (response.ok) {
+        return content
+    } else {
+        throw new PasteCDNError(response.status, content)
     }
 }
