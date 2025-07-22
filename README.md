@@ -67,12 +67,13 @@ Build command: `npm run build`
 
 Build output directory: `.svelte-kit/cloudflare`
 
-You need to at least set the `PUBLIC_API_URL` environment variable for the site to be able to create/view pastes.
+You need to at least set the `PUBLIC_API_URL` environment variable for the site to be able to create/view pastes, and the `PUBLIC_CDN_URL`, as it will be were the documents are fetched from.
 
 Example environment:
 
 ```env
 PUBLIC_API_URL = "https://paste.example.com"
+PUBLIC_CDN_URL = "https://cdn.example.com"
 ```
 
 ### Step 4
