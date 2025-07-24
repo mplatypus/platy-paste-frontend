@@ -36,6 +36,19 @@
             ],
         })
     }
+
+    function formatTimestamp(timestamp: number): String {
+        const date = new Date(timestamp * 1000)
+
+        return date.toLocaleString(undefined, {
+            day: "numeric",
+            month: "numeric",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+        })
+    }
 </script>
 
 <svelte:head>
@@ -59,6 +72,25 @@
     <h1>
         Paste ID: <span style="user-select: all;">{String(data.paste.id)}</span>
     </h1>
+    <div id="timestamps">
+        <p class="timestamp">
+            Created • {formatTimestamp(data.paste.timestamp)}
+        </p>
+        <span id="timestamps-extra">
+            {#if data.paste.expiry_timestamp != null}
+                <p class="timestamp">
+                    Expiry • {formatTimestamp(data.paste.expiry_timestamp)}
+                </p>
+            {:else}
+                <p class="timestamp">No Expiry</p>
+            {/if}
+            {#if data.paste.edited_timestamp != null}
+                <p class="timestamp">
+                    Last Edited • {formatTimestamp(data.paste.edited_timestamp)}
+                </p>
+            {/if}
+        </span>
+    </div>
 </HeaderDiv>
 
 <div id="documents">
@@ -108,6 +140,42 @@
     :global(h1, h2, h3, p, a) {
         font-family: var(--main-font);
         color: var(--color-text);
+    }
+
+    #timestamps {
+        position: relative;
+        margin-left: 1rem;
+        display: inline-block;
+    }
+
+    #timestamps #timestamps-extra {
+        visibility: hidden;
+        width: 120px;
+        text-align: center;
+        padding: 5px 0;
+        border-radius: 6px;
+
+        position: absolute;
+        z-index: 1;
+
+        width: 240px;
+        top: 125%;
+        left: 50%;
+        transform: translateX(-120px);
+    }
+
+    #timestamps-extra {
+        position: relative;
+        display: inline-block;
+        background-color: var(--color-background-header);
+    }
+
+    #timestamps:hover #timestamps-extra {
+        visibility: visible;
+    }
+
+    .timestamp {
+        font-weight: 600;
     }
 
     #documents {
