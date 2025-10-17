@@ -37,17 +37,28 @@
         })
     }
 
-    function formatTimestamp(timestamp: number): String {
-        const date = new Date(timestamp * 1000)
+    function formatTimestamp(timestamp: Date): String {
+        const local = new Date(timestamp)
 
-        return date.toLocaleString(undefined, {
-            day: "numeric",
-            month: "numeric",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-        })
+        const day = local.getDate()
+        const month = local.toLocaleString(undefined, { month: "long" })
+        const year = local.getFullYear()
+
+        const hours = local.getHours().toString().padStart(2, "0")
+        const minutes = local.getMinutes().toString().padStart(2, "0")
+        const seconds = local.getSeconds().toString().padStart(2, "0")
+
+        // Add ordinal suffix (st, nd, rd, th)
+        const suffix =
+            day % 10 === 1 && day !== 11
+                ? "st"
+                : day % 10 === 2 && day !== 12
+                  ? "nd"
+                  : day % 10 === 3 && day !== 13
+                    ? "rd"
+                    : "th"
+
+        return `${day}${suffix} of ${month} ${year} at ${hours}:${minutes}:${seconds}`
     }
 </script>
 
@@ -150,7 +161,7 @@
 
     #timestamps #timestamps-extra {
         visibility: hidden;
-        width: 120px;
+        width: 500px;
         text-align: center;
         padding: 5px 0;
         border-radius: 6px;
@@ -158,10 +169,10 @@
         position: absolute;
         z-index: 1;
 
-        width: 240px;
+        width: 330px;
         top: 125%;
         left: 50%;
-        transform: translateX(-120px);
+        transform: translateX(-165px);
     }
 
     #timestamps-extra {

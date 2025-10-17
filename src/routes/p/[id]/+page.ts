@@ -2,7 +2,6 @@ import { error } from "@sveltejs/kit"
 import type { PageLoad } from "./$types"
 import { fetchDocumentContent, fetchPaste } from "$lib/backend"
 import { PasteError, PasteResponseError } from "$lib/errors"
-import type { Document } from "$lib/models/document"
 
 const SUPPORTED_SNOWFLAKE = RegExp("^\\d{10,}$")
 
@@ -18,7 +17,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
     let paste
     try {
-        paste = await fetchPaste(fetch, params.id, true)
+        paste = await fetchPaste(fetch, params.id)
     } catch (err) {
         if (err instanceof PasteError) {
             if (err instanceof PasteResponseError) {

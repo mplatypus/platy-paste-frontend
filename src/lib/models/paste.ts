@@ -2,8 +2,8 @@ import type { Document } from "./document"
 
 export interface Paste {
     id: string
-    timestamp: number // Created timestamp.
-    edited_timestamp: number | null // Last edited timestamp.
-    expiry_timestamp: number | null // Expiry timestamp.
+    timestamp: Date // Created timestamp.
+    edited_timestamp: Date | null // Last edited timestamp.
+    expiry_timestamp: Date | null // Expiry timestamp.
     documents: Document[]
 }

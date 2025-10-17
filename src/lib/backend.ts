@@ -22,11 +22,8 @@ const BASE_CDN_URL = `${PUBLIC_CDN_URL.trim().replace(/\/$/, "")}`
 export async function fetchPaste(
     svelteFetch: typeof fetch,
     id: string,
-    content: boolean,
 ): Promise<Paste | null> {
-    let response = await svelteFetch(
-        `${BASE_API_URL}/pastes/${id}?content=${content}`,
-    )
+    let response = await svelteFetch(`${BASE_API_URL}/pastes/${id}`)
 
     let payload = await response.json()
 
@@ -40,8 +37,7 @@ export async function fetchPaste(
 }
 
 interface UploadPasteSettings {
-    content?: boolean
-    expiry?: number | null
+    expiry?: Date | null
 }
 
 export async function uploadPaste(
@@ -70,13 +66,7 @@ export async function uploadPaste(
             )
         })
 
-        let query = ""
-
-        if (settings.content != undefined) {
-            query = `?content=${settings.content}`
-        }
-
-        const response = await fetch(`${BASE_API_URL}/pastes${query}`, {
+        const response = await fetch(`${BASE_API_URL}/pastes`, {
             method: "POST",
             mode: "cors",
             body: formData,

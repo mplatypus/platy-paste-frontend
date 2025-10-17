@@ -1,6 +1,6 @@
 export interface NewPaste {
     enableExpiry: boolean // Whether the expiry is enabled.
-    expiry: string // The expiry of the paste.
+    expiry: Date // The expiry of the paste.
     documents: NewDocument[] // The documents of the paste.
 }
 

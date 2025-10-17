@@ -148,11 +148,9 @@
     async function submitPaste() {
         if (!validateDocuments()) return
 
-        let exp: number | null | undefined = undefined
+        let exp: Date | null | undefined = undefined
         if (expiryState === "on") {
-            const localDate = new Date(expiry)
-
-            exp = Math.floor(localDate.getTime() / 1000)
+            exp = new Date(expiry)
         } else if (expiryState === "off") {
             exp = null
         }
