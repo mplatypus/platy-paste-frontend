@@ -9,7 +9,15 @@
         extractNameFromDocument,
         extractTypeFromDocument,
     } from "$lib/types"
+    import { onMount } from "svelte"
     export let data: { paste: Paste; contents: Record<string, string> }
+
+    let documentData = data.paste.documents.map((doc) => ({
+        ...doc,
+        isCollapsed: false,
+    }))
+
+    let htmlContents: Record<string, string> = {}
 
     async function convertContent(
         document: Document,
@@ -37,6 +45,15 @@
         })
     }
 
+    onMount(async () => {
+        for (const doc of documentData) {
+            htmlContents[doc.id] = await convertContent(
+                doc,
+                data.contents[doc.id],
+            )
+        }
+    })
+
     function formatTimestamp(timestamp: Date): String {
         const local = new Date(timestamp)
 
@@ -48,7 +65,6 @@
         const minutes = local.getMinutes().toString().padStart(2, "0")
         const seconds = local.getSeconds().toString().padStart(2, "0")
 
-        // Add ordinal suffix (st, nd, rd, th)
         const suffix =
             day % 10 === 1 && day !== 11
                 ? "st"
@@ -59,6 +75,12 @@
                     : "th"
 
         return `${day}${suffix} of ${month} ${year} at ${hours}:${minutes}:${seconds}`
+    }
+
+    function toggleCollapse(id: string) {
+        documentData = documentData.map((doc) =>
+            doc.id === id ? { ...doc, isCollapsed: !doc.isCollapsed } : doc,
+        )
     }
 </script>
 
@@ -105,7 +127,7 @@
 </HeaderDiv>
 
 <div id="documents">
-    {#each data.paste.documents as document}
+    {#each documentData as document (document.id)}
         <div id={document.id} class="document">
             <div class="document-header">
                 <div class="document-information">
@@ -115,26 +137,58 @@
                     </p>
                     <p class="document-information-id">{document.id}</p>
                 </div>
-                <button
-                    class="document-copy"
-                    onclick={(event: MouseEvent) => {
-                        const button = event.currentTarget as HTMLButtonElement
-                        navigator.clipboard
-                            .writeText(data.contents[document.id])
-                            .then(() => {
-                                button.classList.add("copied")
-                                setTimeout(
-                                    () => button.classList.remove("copied"),
-                                    500,
-                                )
-                            })
-                    }}>copy</button
-                >
+                <div class="document-header-buttons">
+                    <button
+                        class="document-header-button-collapse"
+                        on:click={() => toggleCollapse(document.id)}
+                        type="button"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            height="30"
+                            width="30"
+                            viewBox="0 0 448 512"
+                            ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                                fill="currentColor"
+                                d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
+                            /></svg
+                        >
+                    </button>
+                    <button
+                        class="document-header-button-copy"
+                        on:click={(event: MouseEvent) => {
+                            const button =
+                                event.currentTarget as HTMLButtonElement
+                            navigator.clipboard
+                                .writeText(data.contents[document.id])
+                                .then(() => {
+                                    button.classList.add("copied")
+                                    setTimeout(
+                                        () => button.classList.remove("copied"),
+                                        500,
+                                    )
+                                })
+                        }}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            height="24"
+                            width="24"
+                            viewBox="0 0 512 512"
+                            ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                                fill="currentColor"
+                                d="M288 448l-224 0 0-224 48 0 0-64-48 0c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l224 0c35.3 0 64-28.7 64-64l0-48-64 0 0 48zm-64-96l224 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L224 0c-35.3 0-64 28.7-64 64l0 224c0 35.3 28.7 64 64 64z"
+                            /></svg
+                        >
+                    </button>
+                </div>
             </div>
-            <div class="document-content">
-                {#await convertContent(document, data.contents[document.id]) then val}
-                    {@html val}
-                {/await}
+            <div
+                class="document-content {document.isCollapsed
+                    ? 'collapsed'
+                    : ''}"
+            >
+                {@html htmlContents[document.id]}
             </div>
         </div>
     {/each}
@@ -235,14 +289,41 @@
         background-color: var(--color-content-primary);
     }
 
-    .document-copy {
-        border-radius: var(--radius-md);
-        background-color: var(--color-button-primary);
+    .document-header-buttons {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .document-header-buttons > button {
         color: var(--color-text);
+        border-radius: var(--radius-md);
         height: 2rem;
         margin: 0 0.5rem;
-        padding: 0 0.5rem;
+    }
+
+    .document-header-buttons > button > svg {
+        display: block;
+    }
+
+    .document-header-button-collapse {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+    }
+
+    .document-header-button-collapse > svg {
+        color: var(--color-button-primary);
+    }
+
+    .document-header-button-copy {
+        color: var(--color-text);
         transition: background-color 0.25s ease-out;
+    }
+
+    .document-header-button-copy > svg {
+        color: var(--color-button-primary);
     }
 
     :global(.document-copy.copied) {
@@ -261,6 +342,12 @@
         overflow-x: auto;
         overflow-y: hidden;
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    }
+
+    .document-content.collapsed {
+        height: 0 !important;
+        padding: 0;
+        font-size: 0;
     }
 
     :global(.shiki-pre:focus) {

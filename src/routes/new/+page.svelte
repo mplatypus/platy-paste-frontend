@@ -96,6 +96,7 @@
                 name: "new.txt",
                 oldName: "new.txt",
                 content: "",
+                isCollapsed: false,
             },
         ]
     }
@@ -128,6 +129,12 @@
 
         documents = documents.map((d) =>
             d.id === document.id ? { ...d, type: newType, oldName: d.name } : d,
+        )
+    }
+
+    function toggleDocumentCollapsed(document: NewDocument) {
+        documents = documents.map((d) =>
+            d.id === document.id ? { ...d, isCollapsed: !d.isCollapsed } : d,
         )
     }
 
@@ -174,6 +181,7 @@
 
     function autoResizeTextarea(event: Event) {
         const textarea = event.target as HTMLTextAreaElement
+        if (textarea.closest(".collapsed")) return
         textarea.style.height = "0.5rem"
         textarea.style.height = textarea.scrollHeight + 5 + "px"
     }
@@ -265,14 +273,41 @@
                 </div>
                 <div class="document-header-buttons">
                     <button
+                        class="document-header-button-collapse"
+                        on:click={() => toggleDocumentCollapsed(doc)}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            height="30"
+                            width="30"
+                            viewBox="0 0 448 512"
+                            ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                                fill="currentColor"
+                                d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
+                            /></svg
+                        >
+                    </button>
+                    <button
                         class="document-header-button-delete"
                         on:click={() => deleteDocument(doc.id)}
-                        disabled={documents.length === 1}>delete</button
+                        disabled={documents.length === 1}
                     >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            height="30"
+                            width="30"
+                            viewBox="0 0 384 512"
+                            ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                                fill="currentColor"
+                                d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"
+                            /></svg
+                        >
+                    </button>
                 </div>
             </div>
             <div class="document-content">
                 <textarea
+                    class:collapsed={doc.isCollapsed}
                     bind:value={doc.content}
                     on:input={(event) => autoResizeTextarea(event)}
                 ></textarea>
@@ -449,18 +484,40 @@
         outline: none;
     }
 
-    .document-header-button-delete {
-        background-color: var(--color-danger-primary);
+    .document-header-buttons {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .document-header-buttons > button {
         color: var(--color-text);
         border-radius: var(--radius-md);
         height: 2rem;
         margin: 0 0.5rem;
-        padding: 0 0.5rem;
     }
 
-    .document-header-button-delete:disabled {
-        background-color: var(--color-danger-disabled);
-        cursor: not-allowed;
+    .document-header-buttons > button > svg {
+        display: block;
+    }
+
+    .document-header-button-collapse {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+    }
+
+    .document-header-button-collapse > svg {
+        color: var(--color-button-primary);
+    }
+
+    .document-header-button-delete > svg {
+        color: var(--color-danger-primary);
+    }
+
+    .document-header-button-delete:disabled > svg {
+        color: var(--color-danger-disabled);
     }
 
     /* Document content */
@@ -483,6 +540,12 @@
         overflow-wrap: normal;
         overflow-y: hidden;
         overflow-x: auto;
+    }
+
+    .document-content > textarea.collapsed {
+        height: 0 !important;
+        padding: 0;
+        font-size: 0;
     }
 
     .document-content > textarea:focus {
