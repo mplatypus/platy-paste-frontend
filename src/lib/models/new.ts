@@ -10,4 +10,5 @@ export interface NewDocument {
     name: string // The name of the document.
     oldName: string // The old name of the document.
     content: string // The contents of the document.
+    isCollapsed: boolean // Wether this document is collapsed (shrunk).
 }
