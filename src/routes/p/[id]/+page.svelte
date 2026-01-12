@@ -132,9 +132,25 @@
             class:collapsed={informationCollapsed}
         >
             <div class="document-information-item">
+                <h3>Name</h3>
+                <span></span>
+                {#if data.paste.name != null}
+                    <p>{data.paste.name}</p>
+                {:else}
+                    <p>No name set.</p>
+                {/if}
+            </div>
+            <span class="document-information-separator"></span>
+            <div class="document-information-item">
                 <h3>ID</h3>
                 <span></span>
                 <p>{data.paste.id}</p>
+            </div>
+            <span class="document-information-separator"></span>
+            <div class="document-information-item">
+                <h3>Views</h3>
+                <span></span>
+                <p>{data.paste.views}</p>
             </div>
             <span class="document-information-separator"></span>
             <div class="document-information-item">
@@ -142,6 +158,7 @@
                 <span></span>
                 <p>{formatTimestamp(data.paste.timestamp)}</p>
             </div>
+
             <span class="document-information-separator"></span>
             <div class="document-information-item">
                 <h3>Expiry</h3>

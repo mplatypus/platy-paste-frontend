@@ -43,6 +43,8 @@
         return localDatetime
     }
 
+    let name: string | null = data.config.defaults.paste_name
+    let maximumViews: number | null = data.config.defaults.maximum_views
     let expiryState: string = ""
     let expiryOptions: string[] = []
     let expiry: string = ""
@@ -165,7 +167,11 @@
         }
 
         try {
-            let paste = await uploadPaste(documents, { expiry: exp })
+            let paste = await uploadPaste(documents, {
+                name: name,
+                expiry: exp,
+                max_views: maximumViews,
+            })
 
             goto(`/p/${paste.id}`)
         } catch (err) {
@@ -243,26 +249,46 @@
                     ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
                         fill="currentColor"
                         d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
-                    /></svg
-                >
+                    />
+                </svg>
             </button>
         </div>
         <div id="paste-settings-items" class:collapsed={settingsCollapsed}>
             <div class="paste-setting">
+                <h3 class="paste-setting-header">Name</h3>
+                <div class="paste-setting-content">
+                    <input
+                        type="text"
+                        minlength={data.config.size_limits
+                            .minimum_paste_name_size}
+                        maxlength={data.config.size_limits
+                            .maximum_paste_name_size}
+                        bind:value={name}
+                    />
+                </div>
+            </div>
+            <span class="paste-setting-separator"></span>
+            <div class="paste-setting">
                 <h3 class="paste-setting-header">Expiry</h3>
                 <div class="paste-setting-content">
-                    <label id="paste-expiry-toggle">
+                    <label class="paste-setting-toggle">
                         <Slider
                             options={expiryOptions}
                             bind:value={expiryState}
                         />
                     </label>
                     <input
-                        id="paste-expiry"
                         type="datetime-local"
                         bind:value={expiry}
                         readonly={expiryState != "on"}
                     />
+                </div>
+            </div>
+            <span class="paste-setting-separator"></span>
+            <div class="paste-setting">
+                <h3 class="paste-setting-header">Maximum Views</h3>
+                <div class="paste-setting-content">
+                    <input type="number" min="1" bind:value={maximumViews} />
                 </div>
             </div>
         </div>
@@ -436,10 +462,15 @@
     }
 
     #paste-settings-items {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         width: 100%;
         padding: 0.25rem 0;
         background-color: var(--color);
         background-color: var(--color-content-primary);
+        gap: 1rem;
     }
 
     #paste-settings-items.collapsed {
@@ -473,33 +504,51 @@
         display: flex;
         flex-direction: row;
         justify-content: center;
+        align-items: center;
         height: 100%;
         gap: 0.25rem;
     }
 
-    #paste-expiry {
-        color: var(--color-text);
+    .paste-setting-content > input {
         border: none;
         border-radius: var(--radius-md);
         background-color: var(--color-gray-500);
         align-items: center;
-        height: 95%;
-        -webkit-transition: 0.2s;
-        transition: 0.2s;
-        width: fit-content;
+        height: 100%;
+        width: min(80%, fit-content);
+        color: var(--color-text);
+        font-size: var(--text-lg);
+        font-family: var(--main-font);
+        font-weight: 500;
+        padding: 0.1rem 0.25rem;
     }
 
-    #paste-expiry:hover:not(:read-only) {
+    @media (max-width: 450px) {
+        .paste-setting-content > input {
+            font-size: var(--text-base);
+        }
+    }
+
+    .paste-setting-content > input:hover:not(:read-only) {
         filter: brightness(95%);
     }
 
-    #paste-expiry:read-only {
+    .paste-setting-content > input:read-only {
         background-color: var(--color-gray-600);
         pointer-events: none;
         opacity: 0.6;
     }
 
-    #paste-expiry-toggle {
+    .paste-setting-separator {
+        display: inline;
+        height: 4px;
+        width: 90%;
+        border-radius: 0.5rem;
+        border: var(--color-text);
+        background-color: var(--color-text);
+    }
+
+    .paste-setting-toggle {
         height: 100%;
     }
 
@@ -548,7 +597,7 @@
 
     .document-header-title-name-input:focus,
     .document-header-title-type-input:focus,
-    #paste-expiry:focus {
+    .paste-setting-content > input:focus {
         outline: none;
     }
 
