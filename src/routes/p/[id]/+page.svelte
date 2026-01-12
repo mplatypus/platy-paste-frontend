@@ -3,19 +3,18 @@
     import type { Document } from "$lib/models/document"
     import { codeToHtml } from "shiki"
     import HeaderDiv from "$lib/components/header.svelte"
-    import {
-        DEFAULT_SHIKI,
-        DEFAULT_TYPE,
-        extractNameFromDocument,
-        extractTypeFromDocument,
-    } from "$lib/types"
+    import { DEFAULT_SHIKI, extractTypeFromDocument } from "$lib/types"
     import { onMount } from "svelte"
+    import DocumentHeader from "$lib/components/document_header.svelte"
+
     export let data: { paste: Paste; contents: Record<string, string> }
 
     let documentData = data.paste.documents.map((doc) => ({
         ...doc,
         isCollapsed: false,
     }))
+
+    let informationCollapsed = false
 
     let htmlContents: Record<string, string> = {}
 
@@ -85,7 +84,7 @@
 </script>
 
 <svelte:head>
-    <title>Paste: {data.paste.id}</title>
+    <title>Paste</title>
     <meta property="og:title" content="Paste: {data.paste.id}" />
     <meta
         property="og:description"
@@ -102,91 +101,77 @@
 </svelte:head>
 
 <HeaderDiv>
-    <h1>
-        Paste ID: <span style="user-select: all;">{String(data.paste.id)}</span>
-    </h1>
-    <div id="timestamps">
-        <p class="timestamp">
-            Created • {formatTimestamp(data.paste.timestamp)}
-        </p>
-        <span id="timestamps-extra">
-            {#if data.paste.expiry_timestamp != null}
-                <p class="timestamp">
-                    Expiry • {formatTimestamp(data.paste.expiry_timestamp)}
-                </p>
-            {:else}
-                <p class="timestamp">No Expiry</p>
-            {/if}
-            {#if data.paste.edited_timestamp != null}
-                <p class="timestamp">
-                    Last Edited • {formatTimestamp(data.paste.edited_timestamp)}
-                </p>
-            {/if}
-        </span>
-    </div>
+    <h1 id="paste-id-title">Paste</h1>
 </HeaderDiv>
 
 <div id="documents">
+    <div id="document-information">
+        <div id="document-information-title">
+            <h2>Information</h2>
+            <button
+                class="document-header-button-collapse"
+                on:click={() => {
+                    informationCollapsed = !informationCollapsed
+                }}
+                type="button"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="30"
+                    width="30"
+                    viewBox="0 0 448 512"
+                    ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                        fill="currentColor"
+                        d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
+                    /></svg
+                >
+            </button>
+        </div>
+        <div
+            id="document-information-items"
+            class:collapsed={informationCollapsed}
+        >
+            <div class="document-information-item">
+                <h3>ID</h3>
+                <span></span>
+                <p>{data.paste.id}</p>
+            </div>
+            <span class="document-information-separator"></span>
+            <div class="document-information-item">
+                <h3>Created</h3>
+                <span></span>
+                <p>{formatTimestamp(data.paste.timestamp)}</p>
+            </div>
+            <span class="document-information-separator"></span>
+            <div class="document-information-item">
+                <h3>Expiry</h3>
+                <span></span>
+                {#if data.paste.expiry_timestamp != null}
+                    <p>{formatTimestamp(data.paste.timestamp)}</p>
+                {:else}
+                    <p>Never</p>
+                {/if}
+            </div>
+            {#if data.paste.edited_timestamp != null}
+                <span class="document-information-separator"></span>
+                <div class="document-information-item">
+                    <h3>Edited</h3>
+                    <span></span>
+                    <p>{formatTimestamp(data.paste.edited_timestamp)}</p>
+                </div>
+            {/if}
+        </div>
+    </div>
     {#each documentData as document (document.id)}
         <div id={document.id} class="document">
-            <div class="document-header">
-                <div class="document-information">
-                    <p class="document-information-name">{document.name}</p>
-                    <p class="document-information-type">
-                        {extractNameFromDocument(document) || DEFAULT_TYPE}
-                    </p>
-                    <p class="document-information-id">{document.id}</p>
-                </div>
-                <div class="document-header-buttons">
-                    <button
-                        class="document-header-button-collapse"
-                        on:click={() => toggleCollapse(document.id)}
-                        type="button"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            height="30"
-                            width="30"
-                            viewBox="0 0 448 512"
-                            ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
-                                fill="currentColor"
-                                d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
-                            /></svg
-                        >
-                    </button>
-                    <button
-                        class="document-header-button-copy"
-                        on:click={(event: MouseEvent) => {
-                            const button =
-                                event.currentTarget as HTMLButtonElement
-                            navigator.clipboard
-                                .writeText(data.contents[document.id])
-                                .then(() => {
-                                    button.classList.add("copied")
-                                    setTimeout(
-                                        () => button.classList.remove("copied"),
-                                        500,
-                                    )
-                                })
-                        }}
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            height="24"
-                            width="24"
-                            viewBox="0 0 512 512"
-                            ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
-                                fill="currentColor"
-                                d="M288 448l-224 0 0-224 48 0 0-64-48 0c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l224 0c35.3 0 64-28.7 64-64l0-48-64 0 0 48zm-64-96l224 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L224 0c-35.3 0-64 28.7-64 64l0 224c0 35.3 28.7 64 64 64z"
-                            /></svg
-                        >
-                    </button>
-                </div>
-            </div>
+            <DocumentHeader
+                {document}
+                content={data.contents[document.id]}
+                onCollapse={() => toggleCollapse(document.id)}
+            />
             <div
-                class="document-content {document.isCollapsed
-                    ? 'collapsed'
-                    : ''}"
+                class="document-content"
+                class:collapsed={document.isCollapsed}
             >
                 {@html htmlContents[document.id]}
             </div>
@@ -213,34 +198,108 @@
         display: inline-block;
     }
 
-    #timestamps #timestamps-extra {
-        visibility: hidden;
-        width: 500px;
-        text-align: center;
-        padding: 5px 0;
-        border-radius: 6px;
-
-        position: absolute;
-        z-index: 1;
-
-        width: 330px;
-        top: 125%;
-        left: 50%;
-        transform: translateX(-165px);
+    #document-information {
+        width: 95%;
+        background-color: var(--color-header-primary);
+        border-radius: var(--radius-xl);
+        scroll-margin-top: 80px;
+        justify-items: center;
     }
 
-    #timestamps-extra {
+    #document-information-title {
+        height: 3rem;
+        width: 100%;
         position: relative;
-        display: inline-block;
-        background-color: var(--color-background-header);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    #timestamps:hover #timestamps-extra {
-        visibility: visible;
+    #document-information-title > h2 {
+        font-size: var(--text-3xl);
+        font-weight: bolder;
     }
 
-    .timestamp {
-        font-weight: 600;
+    #document-information-title > button {
+        position: absolute;
+        right: 1rem;
+    }
+
+    #document-information-items {
+        width: 100%;
+        height: fit-content;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        background-color: var(--color-content-primary);
+        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    }
+
+    span.document-information-separator {
+        display: none;
+    }
+
+    @media (max-width: 450px) {
+        span.document-information-separator {
+            display: inline;
+            height: 4px;
+            width: 90%;
+            border-radius: 0.5rem;
+            border: var(--color-text);
+            background-color: var(--color-text);
+        }
+    }
+
+    div.document-information-item {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+        align-items: center;
+        align-content: center;
+    }
+
+    div.document-information-item > h3 {
+        font-size: var(--text-xl);
+        font-weight: 450;
+    }
+
+    div.document-information-item > span {
+        height: 2px;
+        width: 0.5rem;
+        border-radius: 0.5rem;
+        border: var(--color-text);
+        background-color: var(--color-text);
+    }
+
+    @media (max-width: 450px) {
+        div.document-information-item {
+            flex-direction: column;
+        }
+
+        div.document-information-item > span {
+            display: none;
+        }
+    }
+
+    div.document-information-item > p {
+        font-size: var(--text-lg);
+        user-select: all;
+    }
+
+    @media (max-width: 450px) {
+        #document-information-items {
+            gap: 0.75rem;
+        }
+
+        div.document-information-item {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        div.document-information-item > span {
+            width: 5rem;
+        }
     }
 
     #documents {
@@ -260,52 +319,6 @@
         scroll-margin-top: 80px;
     }
 
-    .document-header {
-        height: 3rem;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 0.5rem;
-    }
-
-    .document-information {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .document-information-name,
-    .document-information-id {
-        font-size: var(--text-lg);
-        font-weight: 500;
-        user-select: all;
-    }
-
-    .document-information-type {
-        padding: 0.125rem 0.5rem;
-        border-radius: var(--radius-sm);
-        background-color: var(--color-content-primary);
-    }
-
-    .document-header-buttons {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .document-header-buttons > button {
-        color: var(--color-text);
-        border-radius: var(--radius-md);
-        height: 2rem;
-        margin: 0 0.5rem;
-    }
-
-    .document-header-buttons > button > svg {
-        display: block;
-    }
-
     .document-header-button-collapse {
         display: flex;
         align-items: center;
@@ -317,22 +330,8 @@
         color: var(--color-button-primary);
     }
 
-    .document-header-button-copy {
-        color: var(--color-text);
-        transition: background-color 0.25s ease-out;
-    }
-
-    .document-header-button-copy > svg {
-        color: var(--color-button-primary);
-    }
-
     :global(.document-copy.copied) {
         background-color: var(--color-button-secondary);
-    }
-
-    .document-information > p {
-        font-family: quicksand, sans-serif;
-        color: var(--color-text);
     }
 
     .document-content {
@@ -344,8 +343,9 @@
         border-radius: 0 0 var(--radius-xl) var(--radius-xl);
     }
 
-    .document-content.collapsed {
-        height: 0 !important;
+    div.collapsed {
+        display: none !important;
+        height: 0;
         padding: 0;
         font-size: 0;
     }

@@ -11,6 +11,8 @@
     import type { Config } from "$lib/models/config"
     export let data: { config: Config }
 
+    let settingsCollapsed = false
+
     function generateDefaultExpiry(
         default_hours: number | null = null,
     ): string {
@@ -220,25 +222,49 @@
     <h1>New Paste</h1>
 </HeaderDiv>
 
+<p id="upload-error-message" style:display={errorIsEmpty ? "none" : "flex"}>
+    {errorMessage}
+</p>
+
 <div id="paste">
-    <p id="upload-error-message" style:display={errorIsEmpty ? "none" : "flex"}>
-        {errorMessage}
-    </p>
     <div id="paste-settings">
-        <h2 id="paste-settings-header">Paste Settings</h2>
-        <div id="expiry-div" class="paste-setting">
-            <h3 id="paste-setting-expiry-header" class="paste-setting-header">
-                Expiry
-            </h3>
-            <label id="paste-expiry-toggle">
-                <Slider options={expiryOptions} bind:value={expiryState} />
-            </label>
-            <input
-                id="paste-expiry"
-                type="datetime-local"
-                bind:value={expiry}
-                readonly={expiryState != "on"}
-            />
+        <div id="paste-settings-header">
+            <h2 id="paste-settings-header">Paste Settings</h2>
+            <button
+                on:click={() => {
+                    settingsCollapsed = !settingsCollapsed
+                }}
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="30"
+                    width="30"
+                    viewBox="0 0 448 512"
+                    ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                        fill="currentColor"
+                        d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
+                    /></svg
+                >
+            </button>
+        </div>
+        <div id="paste-settings-items" class:collapsed={settingsCollapsed}>
+            <div class="paste-setting">
+                <h3 class="paste-setting-header">Expiry</h3>
+                <div class="paste-setting-content">
+                    <label id="paste-expiry-toggle">
+                        <Slider
+                            options={expiryOptions}
+                            bind:value={expiryState}
+                        />
+                    </label>
+                    <input
+                        id="paste-expiry"
+                        type="datetime-local"
+                        bind:value={expiry}
+                        readonly={expiryState != "on"}
+                    />
+                </div>
+            </div>
         </div>
     </div>
 
@@ -250,9 +276,10 @@
                         class="document-header-title-name-input"
                         title="The name of the document."
                         type="text"
-                        defaultValue="new.txt"
-                        maxlength="50"
-                        size="15"
+                        minlength={data.config.size_limits
+                            .minimum_document_name_size}
+                        maxlength={data.config.size_limits
+                            .maximum_document_name_size}
                         bind:value={doc.name}
                         on:change={() => {
                             updateDocumentType(doc)
@@ -362,13 +389,14 @@
     #upload-error-message {
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-self: center;
+        align-self: center;
         align-items: center;
         background-color: var(--color-danger-primary);
         font-family: quicksand, sans-serif;
         border-radius: var(--radius-xl);
+        margin-top: 1.5rem;
         padding: 0.25rem 0.5rem;
-
         width: 95%;
         font-size: var(--text-xl);
         font-weight: 600;
@@ -381,38 +409,72 @@
         justify-content: center;
         align-items: center;
         width: 95%;
-        gap: 0.5rem;
         border-radius: var(--radius-xl);
         overflow: hidden;
     }
 
-    .paste-setting {
-        background-color: var(--color-content-primary);
+    #paste-settings-header {
+        height: 3rem;
         width: 100%;
-        padding: 0.5rem;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    #paste-settings-header {
+    #paste-settings-header > h2 {
+        align-self: center;
         font-size: var(--text-xl);
         font-weight: 700;
-        padding-top: 0.5rem;
+        padding: 0.5rem 0;
+    }
+
+    #paste-settings-header > button {
+        position: absolute;
+        right: 1rem;
+        color: var(--color-button-primary);
+    }
+
+    #paste-settings-items {
+        width: 100%;
+        padding: 0.25rem 0;
+        background-color: var(--color);
+        background-color: var(--color-content-primary);
+    }
+
+    #paste-settings-items.collapsed {
+        display: none;
     }
 
     .paste-setting {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+        padding: 0.25rem;
         gap: 1rem;
     }
 
+    @media (max-width: 450px) {
+        .paste-setting {
+            flex-direction: column;
+            justify-content: center;
+            align-items: normal;
+        }
+    }
+
     .paste-setting-header {
+        align-self: center;
         font-size: var(--text-lg);
         font-weight: 600;
     }
 
-    #expiry-div {
+    .paste-setting-content {
         display: flex;
         flex-direction: row;
-        justify-content: start;
-        align-items: center;
-        gap: 0.5rem;
+        justify-content: center;
+        height: 100%;
+        gap: 0.25rem;
     }
 
     #paste-expiry {
@@ -424,6 +486,7 @@
         height: 95%;
         -webkit-transition: 0.2s;
         transition: 0.2s;
+        width: fit-content;
     }
 
     #paste-expiry:hover:not(:read-only) {
@@ -434,6 +497,10 @@
         background-color: var(--color-gray-600);
         pointer-events: none;
         opacity: 0.6;
+    }
+
+    #paste-expiry-toggle {
+        height: 100%;
     }
 
     .document {
@@ -471,6 +538,7 @@
         align-items: center;
         font-size: var(--text-lg);
         transition: 0.2s;
+        width: 50%;
     }
 
     .document-header-title-name-input:hover,
