@@ -37,7 +37,9 @@ export async function fetchPaste(
 }
 
 interface UploadPasteSettings {
+    name?: string | null
     expiry?: Date | null
+    max_views?: number | null
 }
 
 export async function uploadPaste(
@@ -48,7 +50,9 @@ export async function uploadPaste(
         const formData = new FormData()
 
         let payload = {
+            name: settings.name,
             expiry_timestamp: settings.expiry,
+            max_views: settings.max_views,
         }
 
         formData.append(
