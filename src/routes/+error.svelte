@@ -2,8 +2,6 @@
     import { goto } from "$app/navigation"
     import { page } from "$app/state"
     import HeaderDiv from "$lib/components/header.svelte"
-    import { PasteResponseError } from "$lib/errors"
-    //import { PasteResponseError } from "$lib/errors"
 
     let error = page.error
 
