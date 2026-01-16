@@ -14,7 +14,7 @@
         "format-check": "npx prettier --check ."
     },
     "devDependencies": {
-        "@sveltejs/adapter-auto": "^6.0.0",
+        "@sveltejs/adapter-auto": "^7.0.0",
         "@sveltejs/adapter-cloudflare": "^7.2.4",
         "@sveltejs/kit": "^2.20.7",
         "@sveltejs/vite-plugin-svelte": "^5.0.0",
