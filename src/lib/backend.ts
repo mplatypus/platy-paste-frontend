@@ -42,6 +42,18 @@ interface UploadPasteSettings {
     max_views?: number | null
 }
 
+interface UploadPasteBody {
+    name?: string | null
+    expiry_timestamp?: Date | null
+    max_views?: number | null
+    documents: UploadPasteDocumentBody[]
+}
+
+interface UploadPasteDocumentBody {
+    id: number
+    name: string
+}
+
 export async function uploadPaste(
     documents: NewDocument[],
     settings: UploadPasteSettings = {},
@@ -49,26 +61,33 @@ export async function uploadPaste(
     try {
         const formData = new FormData()
 
-        let payload = {
+        let payload: UploadPasteBody = {
             name: settings.name,
             expiry_timestamp: settings.expiry,
             max_views: settings.max_views,
+            documents: [],
         }
+
+        let formDocuments: Record<number, Blob> = {}
+        documents.forEach((document, index) => {
+            let mime = getType(document.type)?.mime || DEFAULT_MIME
+
+            payload.documents.push({
+                id: index,
+                name: document.name,
+            })
+
+            formDocuments[index] = new Blob([document.content], { type: mime })
+        })
 
         formData.append(
             "payload",
             new Blob([JSON.stringify(payload)], { type: "application/json" }),
         )
 
-        documents.forEach((doc) => {
-            let mime = getType(doc.type)?.mime || DEFAULT_MIME
-
-            formData.append(
-                String(doc.id),
-                new Blob([doc.content], { type: mime }),
-                doc.name,
-            )
-        })
+        for (const [id, content] of Object.entries(formDocuments)) {
+            formData.append(`files[${id}]`, content)
+        }
 
         const response = await fetch(`${BASE_API_URL}/pastes`, {
             method: "POST",
