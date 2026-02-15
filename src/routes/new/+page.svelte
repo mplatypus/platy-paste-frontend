@@ -9,6 +9,7 @@
     import type { NewDocument } from "$lib/models/new"
     import Slider from "$lib/components/slider.svelte"
     import type { Config } from "$lib/models/config"
+    import Loader from "$lib/components/loader.svelte"
     export let data: { config: Config }
 
     let settingsCollapsed = false
@@ -236,157 +237,165 @@
     {errorMessage}
 </p>
 
-<div id="paste">
-    <div id="paste-settings">
-        <div id="paste-settings-header">
-            <h2 id="paste-settings-header">Paste Settings</h2>
-            <button
-                on:click={() => {
-                    settingsCollapsed = !settingsCollapsed
-                }}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="30"
-                    width="30"
-                    viewBox="0 0 448 512"
-                    ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
-                        fill="currentColor"
-                        d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
-                    />
-                </svg>
-            </button>
-        </div>
-        <div id="paste-settings-items" class:collapsed={settingsCollapsed}>
-            <div class="paste-setting">
-                <h3 class="paste-setting-header">Name</h3>
-                <div class="paste-setting-content">
-                    <input
-                        type="text"
-                        minlength={data.config.size_limits
-                            .minimum_paste_name_size}
-                        maxlength={data.config.size_limits
-                            .maximum_paste_name_size}
-                        bind:value={name}
-                    />
-                </div>
-            </div>
-            <span class="paste-setting-separator"></span>
-            <div class="paste-setting">
-                <h3 class="paste-setting-header">Expiry</h3>
-                <div class="paste-setting-content">
-                    <label class="paste-setting-toggle">
-                        <Slider
-                            options={expiryOptions}
-                            bind:value={expiryState}
+{#if !data}
+    <Loader />
+{:else}
+    <div id="paste">
+        <div id="paste-settings">
+            <div id="paste-settings-header">
+                <h2 id="paste-settings-header">Paste Settings</h2>
+                <button
+                    on:click={() => {
+                        settingsCollapsed = !settingsCollapsed
+                    }}
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="30"
+                        width="30"
+                        viewBox="0 0 448 512"
+                        ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                            fill="currentColor"
+                            d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
                         />
-                    </label>
-                    <input
-                        type="datetime-local"
-                        bind:value={expiry}
-                        readonly={expiryState != "on"}
-                    />
-                </div>
+                    </svg>
+                </button>
             </div>
-            <span class="paste-setting-separator"></span>
-            <div class="paste-setting">
-                <h3 class="paste-setting-header">Maximum Views</h3>
-                <div class="paste-setting-content">
-                    <input type="number" min="1" bind:value={maximumViews} />
+            <div id="paste-settings-items" class:collapsed={settingsCollapsed}>
+                <div class="paste-setting">
+                    <h3 class="paste-setting-header">Name</h3>
+                    <div class="paste-setting-content">
+                        <input
+                            type="text"
+                            minlength={data.config.size_limits
+                                .minimum_paste_name_size}
+                            maxlength={data.config.size_limits
+                                .maximum_paste_name_size}
+                            bind:value={name}
+                        />
+                    </div>
+                </div>
+                <span class="paste-setting-separator"></span>
+                <div class="paste-setting">
+                    <h3 class="paste-setting-header">Expiry</h3>
+                    <div class="paste-setting-content">
+                        <label class="paste-setting-toggle">
+                            <Slider
+                                options={expiryOptions}
+                                bind:value={expiryState}
+                            />
+                        </label>
+                        <input
+                            type="datetime-local"
+                            bind:value={expiry}
+                            readonly={expiryState != "on"}
+                        />
+                    </div>
+                </div>
+                <span class="paste-setting-separator"></span>
+                <div class="paste-setting">
+                    <h3 class="paste-setting-header">Maximum Views</h3>
+                    <div class="paste-setting-content">
+                        <input
+                            type="number"
+                            min="1"
+                            bind:value={maximumViews}
+                        />
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    {#each documents as doc (doc.id)}
-        <div class="document">
-            <div class="document-header">
-                <div class="document-header-title">
-                    <input
-                        class="document-header-title-name-input"
-                        title="The name of the document."
-                        type="text"
-                        minlength={data.config.size_limits
-                            .minimum_document_name_size}
-                        maxlength={data.config.size_limits
-                            .maximum_document_name_size}
-                        bind:value={doc.name}
-                        on:change={() => {
-                            updateDocumentType(doc)
-                        }}
-                    />
+        {#each documents as doc (doc.id)}
+            <div class="document">
+                <div class="document-header">
+                    <div class="document-header-title">
+                        <input
+                            class="document-header-title-name-input"
+                            title="The name of the document."
+                            type="text"
+                            minlength={data.config.size_limits
+                                .minimum_document_name_size}
+                            maxlength={data.config.size_limits
+                                .maximum_document_name_size}
+                            bind:value={doc.name}
+                            on:change={() => {
+                                updateDocumentType(doc)
+                            }}
+                        />
 
-                    <select
-                        class="document-header-title-type-input"
-                        title="The type of the document."
-                        bind:value={doc.type}
-                    >
-                        {#each getAllTypes() as validType}
-                            <option selected={doc.type == "txt"}
-                                >{validType}</option
+                        <select
+                            class="document-header-title-type-input"
+                            title="The type of the document."
+                            bind:value={doc.type}
+                        >
+                            {#each getAllTypes() as validType}
+                                <option selected={doc.type == "txt"}
+                                    >{validType}</option
+                                >
+                            {/each}
+                        </select>
+                    </div>
+                    <div class="document-header-buttons">
+                        <button
+                            class="document-header-button-collapse"
+                            on:click={() => toggleDocumentCollapsed(doc)}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                height="30"
+                                width="30"
+                                viewBox="0 0 448 512"
+                                ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                                    fill="currentColor"
+                                    d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
+                                /></svg
                             >
-                        {/each}
-                    </select>
+                        </button>
+                        <button
+                            class="document-header-button-delete"
+                            on:click={() => deleteDocument(doc.id)}
+                            disabled={documents.length === 1}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                height="30"
+                                width="30"
+                                viewBox="0 0 384 512"
+                                ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                                    fill="currentColor"
+                                    d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"
+                                /></svg
+                            >
+                        </button>
+                    </div>
                 </div>
-                <div class="document-header-buttons">
-                    <button
-                        class="document-header-button-collapse"
-                        on:click={() => toggleDocumentCollapsed(doc)}
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            height="30"
-                            width="30"
-                            viewBox="0 0 448 512"
-                            ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
-                                fill="currentColor"
-                                d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
-                            /></svg
-                        >
-                    </button>
-                    <button
-                        class="document-header-button-delete"
-                        on:click={() => deleteDocument(doc.id)}
-                        disabled={documents.length === 1}
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            height="30"
-                            width="30"
-                            viewBox="0 0 384 512"
-                            ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
-                                fill="currentColor"
-                                d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"
-                            /></svg
-                        >
-                    </button>
+                <div class="document-content">
+                    <textarea
+                        class:collapsed={doc.isCollapsed}
+                        bind:value={doc.content}
+                        on:input={(event) => autoResizeTextarea(event)}
+                    ></textarea>
                 </div>
             </div>
-            <div class="document-content">
-                <textarea
-                    class:collapsed={doc.isCollapsed}
-                    bind:value={doc.content}
-                    on:input={(event) => autoResizeTextarea(event)}
-                ></textarea>
-            </div>
+        {/each}
+        <div id="buttons">
+            <button
+                on:click={newDocument}
+                disabled={documents.length >=
+                    data.config.size_limits.maximum_total_document_count}
+                >add</button
+            >
+            <button
+                on:click={submitPaste}
+                disabled={!validateDocuments() ||
+                    documents.length <
+                        data.config.size_limits.minimum_total_document_count}
+                >save</button
+            >
         </div>
-    {/each}
-    <div id="buttons">
-        <button
-            on:click={newDocument}
-            disabled={documents.length >=
-                data.config.size_limits.maximum_total_document_count}
-            >add</button
-        >
-        <button
-            on:click={submitPaste}
-            disabled={!validateDocuments() ||
-                documents.length <
-                    data.config.size_limits.minimum_total_document_count}
-            >save</button
-        >
     </div>
-</div>
+{/if}
 
 <style lang="postcss">
     @reference "tailwindcss";
