@@ -6,6 +6,7 @@
     import { DEFAULT_SHIKI, extractTypeFromDocument } from "$lib/types"
     import { onMount } from "svelte"
     import DocumentHeader from "$lib/components/document_header.svelte"
+    import Loader from "$lib/components/loader.svelte"
 
     export let data: { paste: Paste; contents: Record<string, string> }
 
@@ -104,97 +105,101 @@
     <h1 id="paste-id-title">Paste</h1>
 </HeaderDiv>
 
-<div id="documents">
-    <div id="document-information">
-        <div id="document-information-title">
-            <h2>Information</h2>
-            <button
-                class="document-header-button-collapse"
-                on:click={() => {
-                    informationCollapsed = !informationCollapsed
-                }}
-                type="button"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="30"
-                    width="30"
-                    viewBox="0 0 448 512"
-                    ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
-                        fill="currentColor"
-                        d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
-                    /></svg
+{#if !data}
+    <Loader />
+{:else}
+    <div id="documents">
+        <div id="document-information">
+            <div id="document-information-title">
+                <h2>Information</h2>
+                <button
+                    class="document-header-button-collapse"
+                    on:click={() => {
+                        informationCollapsed = !informationCollapsed
+                    }}
+                    type="button"
                 >
-            </button>
-        </div>
-        <div
-            id="document-information-items"
-            class:collapsed={informationCollapsed}
-        >
-            <div class="document-information-item">
-                <h3>Name</h3>
-                <span></span>
-                {#if data.paste.name != null}
-                    <p>{data.paste.name}</p>
-                {:else}
-                    <p>No name set.</p>
-                {/if}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="30"
+                        width="30"
+                        viewBox="0 0 448 512"
+                        ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                            fill="currentColor"
+                            d="M0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32z"
+                        /></svg
+                    >
+                </button>
             </div>
-            <span class="document-information-separator"></span>
-            <div class="document-information-item">
-                <h3>ID</h3>
-                <span></span>
-                <p>{data.paste.id}</p>
-            </div>
-            <span class="document-information-separator"></span>
-            <div class="document-information-item">
-                <h3>Views</h3>
-                <span></span>
-                <p>{data.paste.views}</p>
-            </div>
-            <span class="document-information-separator"></span>
-            <div class="document-information-item">
-                <h3>Created</h3>
-                <span></span>
-                <p>{formatTimestamp(data.paste.timestamp)}</p>
-            </div>
-
-            <span class="document-information-separator"></span>
-            <div class="document-information-item">
-                <h3>Expiry</h3>
-                <span></span>
-                {#if data.paste.expiry_timestamp != null}
-                    <p>{formatTimestamp(data.paste.timestamp)}</p>
-                {:else}
-                    <p>Never</p>
-                {/if}
-            </div>
-            {#if data.paste.edited_timestamp != null}
+            <div
+                id="document-information-items"
+                class:collapsed={informationCollapsed}
+            >
+                <div class="document-information-item">
+                    <h3>Name</h3>
+                    <span></span>
+                    {#if data.paste.name != null}
+                        <p>{data.paste.name}</p>
+                    {:else}
+                        <p>No name set.</p>
+                    {/if}
+                </div>
                 <span class="document-information-separator"></span>
                 <div class="document-information-item">
-                    <h3>Edited</h3>
+                    <h3>ID</h3>
                     <span></span>
-                    <p>{formatTimestamp(data.paste.edited_timestamp)}</p>
+                    <p>{data.paste.id}</p>
                 </div>
-            {/if}
-        </div>
-    </div>
-    {#each documentData as document (document.id)}
-        <div id={document.id} class="document">
-            <DocumentHeader
-                {document}
-                content={data.contents[document.id]}
-                onCollapse={() => toggleCollapse(document.id)}
-            />
-            <div
-                class="document-content"
-                class:collapsed={document.isCollapsed}
-            >
-                {@html htmlContents[document.id]}
+                <span class="document-information-separator"></span>
+                <div class="document-information-item">
+                    <h3>Views</h3>
+                    <span></span>
+                    <p>{data.paste.views}</p>
+                </div>
+                <span class="document-information-separator"></span>
+                <div class="document-information-item">
+                    <h3>Created</h3>
+                    <span></span>
+                    <p>{formatTimestamp(data.paste.timestamp)}</p>
+                </div>
+
+                <span class="document-information-separator"></span>
+                <div class="document-information-item">
+                    <h3>Expiry</h3>
+                    <span></span>
+                    {#if data.paste.expiry_timestamp != null}
+                        <p>{formatTimestamp(data.paste.timestamp)}</p>
+                    {:else}
+                        <p>Never</p>
+                    {/if}
+                </div>
+                {#if data.paste.edited_timestamp != null}
+                    <span class="document-information-separator"></span>
+                    <div class="document-information-item">
+                        <h3>Edited</h3>
+                        <span></span>
+                        <p>{formatTimestamp(data.paste.edited_timestamp)}</p>
+                    </div>
+                {/if}
             </div>
         </div>
-    {/each}
-</div>
+        {#each documentData as document (document.id)}
+            <div id={document.id} class="document">
+                <DocumentHeader
+                    {document}
+                    content={data.contents[document.id]}
+                    onCollapse={() => toggleCollapse(document.id)}
+                />
+                <div
+                    class="document-content"
+                    class:collapsed={document.isCollapsed}
+                >
+                    {@html htmlContents[document.id]}
+                </div>
+            </div>
+        {/each}
+    </div>
+{/if}
 
 <style lang="postcss">
     @reference "tailwindcss";
