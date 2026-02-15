@@ -174,7 +174,11 @@
                 max_views: maximumViews,
             })
 
-            goto(`/p/${paste.id}`)
+            goto(`/p/${paste.id}`, {
+                state: {
+                    paste_token: paste.token,
+                },
+            })
         } catch (err) {
             errorMessage = "Unknown Error"
 

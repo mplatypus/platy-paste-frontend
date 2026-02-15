@@ -10,7 +10,9 @@ declare global {
             timestamp: number | null
             paste_id: string | null
         }
+        interface PageState {
+            paste_token?: string
+        }
     }
 }
-
 export {}

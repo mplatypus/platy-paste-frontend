@@ -7,6 +7,8 @@
     import { onMount } from "svelte"
     import DocumentHeader from "$lib/components/document_header.svelte"
     import Loader from "$lib/components/loader.svelte"
+    import { page } from "$app/state"
+    import { copyContent } from "$lib/common"
 
     export let data: { paste: Paste; contents: Record<string, string> }
 
@@ -181,6 +183,30 @@
                         <p>{formatTimestamp(data.paste.edited_timestamp)}</p>
                     </div>
                 {/if}
+                {#if page.state.paste_token != undefined}
+                    <span class="document-information-separator"></span>
+                    <div class="document-information-item">
+                        <h3>Token</h3>
+                        <span></span>
+                        <p>{page.state.paste_token.slice(0, 10)}...</p>
+                        <button
+                            on:click={(event) => {
+                                copyContent(event, page.state.paste_token ?? "")
+                            }}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                height="24"
+                                width="24"
+                                viewBox="0 0 512 512"
+                                ><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                                    fill="currentColor"
+                                    d="M288 448l-224 0 0-224 48 0 0-64-48 0c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l224 0c35.3 0 64-28.7 64-64l0-48-64 0 0 48zm-64-96l224 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L224 0c-35.3 0-64 28.7-64 64l0 224c0 35.3 28.7 64 64 64z"
+                                /></svg
+                            >
+                        </button>
+                    </div>
+                {/if}
             </div>
         </div>
         {#each documentData as document (document.id)}
@@ -348,8 +374,14 @@
         min-width: 0;
     }
 
-    .document-header-button-collapse > svg {
+    .document-header-button-collapse > svg,
+    .document-information-item > button > svg {
         color: var(--color-button-primary);
+    }
+
+    .document-information-item > button {
+        width: 25px;
+        height: 25px;
     }
 
     :global(.document-copy.copied) {
