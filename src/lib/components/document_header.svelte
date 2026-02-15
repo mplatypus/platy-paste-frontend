@@ -1,17 +1,10 @@
 <script lang="ts">
+    import { copyContent } from "$lib/common"
     import { DEFAULT_TYPE, extractNameFromDocument } from "$lib/types"
 
     let { document, content = "", onCollapse = () => {} } = $props()
 
     let menuCollapsed = $state(true)
-
-    function copyContent(event: MouseEvent, data: string) {
-        const button = event.currentTarget as HTMLButtonElement
-        navigator.clipboard.writeText(data).then(() => {
-            button.classList.add("copied")
-            setTimeout(() => button.classList.remove("copied"), 500)
-        })
-    }
 </script>
 
 <div class="document-header">
