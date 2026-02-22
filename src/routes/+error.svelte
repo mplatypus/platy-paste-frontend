@@ -1,7 +1,9 @@
 <script lang="ts">
     import { goto } from "$app/navigation"
     import { page } from "$app/state"
+    import { toISO8601Timestamp } from "$lib/common"
     import HeaderDiv from "$lib/components/header.svelte"
+    import * as errors from "$lib/errors"
 
     let error = page.error
 
@@ -15,18 +17,17 @@
     }
 
     if (error != null) {
-        message = error.message
-        trace = error.trace
-        if (error.timestamp != null) {
-            time = Intl.DateTimeFormat("en-US", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: false,
-            }).format(Number(error.timestamp))
+        let inner = error.error
+        if (inner instanceof errors.PasteUnknownError) {
+            message = inner.message
+        } else if (inner instanceof errors.PasteHTTPError) {
+            message = inner.message
+            trace = inner.trace
+            if (inner.time != undefined) {
+                time = toISO8601Timestamp(inner.time)
+            }
+        } else {
+            message = inner.message
         }
     }
 </script>

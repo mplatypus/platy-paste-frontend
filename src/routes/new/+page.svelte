@@ -5,11 +5,12 @@
     import { DEFAULT_TYPE, extractNameFromName, getAllTypes } from "$lib/types"
 
     import { uploadPaste } from "$lib/backend"
-    import { PasteResponseError } from "$lib/errors"
+    import { PasteHTTPError } from "$lib/errors"
     import type { NewDocument } from "$lib/models/new"
     import Slider from "$lib/components/slider.svelte"
     import type { Config } from "$lib/models/config"
     import Loader from "$lib/components/loader.svelte"
+    import { toISO8601Timestamp } from "$lib/common"
     export let data: { config: Config }
 
     let settingsCollapsed = false
@@ -23,25 +24,7 @@
             time = new Date(time.getTime() + default_hours * 3600 * 1000)
         }
 
-        var utcString = time.toISOString().substring(0, 19)
-        var year = time.getFullYear()
-        var month = time.getMonth() + 1
-        var day = time.getDate()
-        var hour = time.getHours()
-        var minute = time.getMinutes()
-        var localDatetime =
-            year +
-            "-" +
-            (month < 10 ? "0" + month.toString() : month) +
-            "-" +
-            (day < 10 ? "0" + day.toString() : day) +
-            "T" +
-            (hour < 10 ? "0" + hour.toString() : hour) +
-            ":" +
-            (minute < 10 ? "0" + minute.toString() : minute) +
-            utcString.substring(16, 19)
-
-        return localDatetime
+        return toISO8601Timestamp(time)
     }
 
     let name: string | null = data.config.defaults.paste_name
@@ -168,7 +151,7 @@
         }
 
         try {
-            let paste = await uploadPaste(documents, {
+            let paste = await uploadPaste(fetch, documents, {
                 name: name,
                 expiry: exp,
                 max_views: maximumViews,
@@ -182,7 +165,7 @@
         } catch (err) {
             errorMessage = "Unknown Error"
 
-            if (err instanceof PasteResponseError) {
+            if (err instanceof PasteHTTPError) {
                 if (err.trace) {
                     errorMessage = err.trace
                 } else {
