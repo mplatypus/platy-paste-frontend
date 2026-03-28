@@ -120,7 +120,9 @@ export async function uploadPaste(
 /* /config endpoints */
 
 export async function fetchConfig(svelteFetch: typeof fetch): Promise<Config> {
-    let response = await svelteFetch(`${BASE_API_URL}/config`)
+    let response = await svelteFetch(
+        `${BASE_API_URL}/information/configuration`,
+    )
 
     let payload = await response.json()
 
