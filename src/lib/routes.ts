@@ -44,7 +44,7 @@ export class BuiltRoute {
 }
 
 // Config
-export const GET_CONFIG = new Route("GET", "/config")
+export const GET_CONFIG = new Route("GET", "/information/configuration")
 
 // Paste
 export const GET_PASTE = new Route("GET", "/pastes/{paste_id}")
