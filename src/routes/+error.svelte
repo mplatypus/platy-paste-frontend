@@ -17,18 +17,9 @@
     }
 
     if (error != null) {
-        let inner = error.error
-        if (inner instanceof errors.PasteUnknownError) {
-            message = inner.message
-        } else if (inner instanceof errors.PasteHTTPError) {
-            message = inner.message
-            trace = inner.trace
-            if (inner.time != undefined) {
-                time = toISO8601Timestamp(inner.time)
-            }
-        } else {
-            message = inner.message
-        }
+        message = error.message
+        trace = error.trace
+        time = error.time
     }
 </script>
 

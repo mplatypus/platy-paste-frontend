@@ -13,12 +13,9 @@ const SUPPORTED_SNOWFLAKE = RegExp("^\\d{10,}$")
 
 export const load: PageLoad = async ({ params, fetch }) => {
     if (!SUPPORTED_SNOWFLAKE.test(params.id)) {
-        let invalidSnowflakeError = new PasteError(
-            "The snowflake provided is invalid.",
-        )
         error(400, {
-            message: invalidSnowflakeError.message,
-            error: invalidSnowflakeError,
+            message: "Invalid Snowflake",
+            trace: "The snowflake provided is invalid.",
             paste_id: params.id,
         })
     }
@@ -31,20 +28,21 @@ export const load: PageLoad = async ({ params, fetch }) => {
             if (err instanceof PasteTimeoutError) {
                 return error(429, {
                     message: err.message,
-                    error: err,
+                    trace: null,
                     paste_id: undefined,
                 })
             }
             if (err instanceof PasteHTTPError) {
                 return error(err.status, {
                     message: err.message,
-                    error: err,
+                    trace: err.trace,
+                    time: err.time,
                     paste_id: undefined,
                 })
             }
             return error(500, {
                 message: err.message,
-                error: err,
+                trace: null,
                 paste_id: undefined,
             })
         }
@@ -53,19 +51,15 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
         return error(500, {
             message: unknownError.message,
-            error: unknownError,
+            trace: null,
             paste_id: undefined,
         })
     }
 
     if (paste == null) {
-        let notFoundError = new PasteNotFoundError(
-            "Paste not found.",
-            `The paste with the ID: ${params.id} was not found.`,
-        )
         return error(404, {
-            message: notFoundError.message,
-            error: notFoundError,
+            message: "Paste not found.",
+            trace: `The paste with the ID: ${params.id} was not found.`,
             paste_id: params.id,
         })
     }
@@ -80,20 +74,21 @@ export const load: PageLoad = async ({ params, fetch }) => {
                 if (err instanceof PasteTimeoutError) {
                     return error(429, {
                         message: err.message,
-                        error: err,
+                        trace: null,
                         paste_id: undefined,
                     })
                 }
                 if (err instanceof PasteHTTPError) {
                     return error(err.status, {
                         message: err.message,
-                        error: err,
+                        trace: err.trace,
+                        time: err.time,
                         paste_id: undefined,
                     })
                 }
                 return error(500, {
                     message: err.message,
-                    error: err,
+                    trace: null,
                     paste_id: undefined,
                 })
             }
@@ -102,7 +97,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
             return error(500, {
                 message: unknownError.message,
-                error: unknownError,
+                trace: null,
                 paste_id: undefined,
             })
         }
@@ -113,8 +108,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
                 `The document with the ID: ${doc.id} was not found.`,
             )
             return error(404, {
-                message: notFoundError.message,
-                error: notFoundError,
+                message: "Document not found.",
+                trace: `The document with the ID: ${doc.id} was not found.`,
                 paste_id: params.id,
             })
         }
