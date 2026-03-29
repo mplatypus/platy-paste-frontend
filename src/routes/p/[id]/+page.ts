@@ -1,16 +1,24 @@
 import { error } from "@sveltejs/kit"
 import type { PageLoad } from "./$types"
 import { fetchDocumentContent, fetchPaste } from "$lib/backend"
-import { PasteError, PasteResponseError } from "$lib/errors"
+import {
+    PasteError,
+    PasteHTTPError,
+    PasteNotFoundError,
+    PasteTimeoutError,
+    PasteUnknownError,
+} from "$lib/errors"
 
 const SUPPORTED_SNOWFLAKE = RegExp("^\\d{10,}$")
 
 export const load: PageLoad = async ({ params, fetch }) => {
     if (!SUPPORTED_SNOWFLAKE.test(params.id)) {
+        let invalidSnowflakeError = new PasteError(
+            "The snowflake provided is invalid.",
+        )
         error(400, {
-            message: "Invalid snowflake received.",
-            trace: "The snowflake provided contains invalid characters or is too short.",
-            timestamp: null,
+            message: invalidSnowflakeError.message,
+            error: invalidSnowflakeError,
             paste_id: params.id,
         })
     }
@@ -20,38 +28,44 @@ export const load: PageLoad = async ({ params, fetch }) => {
         paste = await fetchPaste(fetch, params.id)
     } catch (err) {
         if (err instanceof PasteError) {
-            if (err instanceof PasteResponseError) {
-                return error(err.status, {
+            if (err instanceof PasteTimeoutError) {
+                return error(429, {
                     message: err.message,
-                    trace: err.trace,
-                    timestamp: err.timestamp,
-                    paste_id: params.id,
+                    error: err,
+                    paste_id: undefined,
                 })
             }
-            return error(501, {
+            if (err instanceof PasteHTTPError) {
+                return error(err.status, {
+                    message: err.message,
+                    error: err,
+                    paste_id: undefined,
+                })
+            }
+            return error(500, {
                 message: err.message,
-                trace: null,
-                timestamp: null,
-                paste_id: params.id,
+                error: err,
+                paste_id: undefined,
             })
         }
 
-        let message = "Unknown Error"
-        if (err instanceof Error) message = err.message
+        let unknownError = new PasteUnknownError("Unknown Error")
 
-        return error(501, {
-            message: message,
-            trace: null,
-            timestamp: null,
-            paste_id: params.id,
+        return error(500, {
+            message: unknownError.message,
+            error: unknownError,
+            paste_id: undefined,
         })
     }
 
     if (paste == null) {
+        let notFoundError = new PasteNotFoundError(
+            "Paste not found.",
+            `The paste with the ID: ${params.id} was not found.`,
+        )
         return error(404, {
-            message: "Paste Not Found.",
-            trace: "The paste provided could not be found.",
-            timestamp: null,
+            message: notFoundError.message,
+            error: notFoundError,
             paste_id: params.id,
         })
     }
@@ -63,39 +77,45 @@ export const load: PageLoad = async ({ params, fetch }) => {
             document = await fetchDocumentContent(fetch, doc)
         } catch (err) {
             if (err instanceof PasteError) {
-                if (err instanceof PasteResponseError) {
-                    return error(err.status, {
+                if (err instanceof PasteTimeoutError) {
+                    return error(429, {
                         message: err.message,
-                        trace: err.trace,
-                        timestamp: err.timestamp,
-                        paste_id: doc.paste_id,
+                        error: err,
+                        paste_id: undefined,
                     })
                 }
-                return error(501, {
+                if (err instanceof PasteHTTPError) {
+                    return error(err.status, {
+                        message: err.message,
+                        error: err,
+                        paste_id: undefined,
+                    })
+                }
+                return error(500, {
                     message: err.message,
-                    trace: null,
-                    timestamp: null,
-                    paste_id: doc.paste_id,
+                    error: err,
+                    paste_id: undefined,
                 })
             }
 
-            let message = "Unknown Error"
-            if (err instanceof Error) message = err.message
+            let unknownError = new PasteUnknownError("Unknown Error")
 
-            return error(501, {
-                message: message,
-                trace: null,
-                timestamp: null,
-                paste_id: doc.paste_id,
+            return error(500, {
+                message: unknownError.message,
+                error: unknownError,
+                paste_id: undefined,
             })
         }
 
         if (document == null) {
+            let notFoundError = new PasteNotFoundError(
+                "Document not found.",
+                `The document with the ID: ${doc.id} was not found.`,
+            )
             return error(404, {
-                message: "Paste Not Found.",
-                trace: "The paste provided could not be found.",
-                timestamp: null,
-                paste_id: doc.paste_id,
+                message: notFoundError.message,
+                error: notFoundError,
+                paste_id: params.id,
             })
         }
 

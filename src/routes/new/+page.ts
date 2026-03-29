@@ -1,7 +1,12 @@
 import { error } from "@sveltejs/kit"
 import type { PageLoad } from "./$types"
 import { fetchConfig } from "$lib/backend"
-import { PasteError, PasteResponseError } from "$lib/errors"
+import {
+    PasteError,
+    PasteHTTPError,
+    PasteTimeoutError,
+    PasteUnknownError,
+} from "$lib/errors"
 
 export const load: PageLoad = async ({ fetch }) => {
     let config
@@ -9,39 +14,33 @@ export const load: PageLoad = async ({ fetch }) => {
         config = await fetchConfig(fetch)
     } catch (err) {
         if (err instanceof PasteError) {
-            if (err instanceof PasteResponseError) {
-                return error(err.status, {
+            if (err instanceof PasteTimeoutError) {
+                return error(429, {
                     message: err.message,
-                    trace: err.trace,
-                    timestamp: err.timestamp,
-                    paste_id: null,
+                    error: err,
+                    paste_id: undefined,
                 })
             }
-            return error(501, {
+            if (err instanceof PasteHTTPError) {
+                return error(err.status, {
+                    message: err.message,
+                    error: err,
+                    paste_id: undefined,
+                })
+            }
+            return error(500, {
                 message: err.message,
-                trace: null,
-                timestamp: null,
-                paste_id: null,
+                error: err,
+                paste_id: undefined,
             })
         }
 
-        let message = "Unknown Error"
-        if (err instanceof Error) message = err.message
+        let unknownError = new PasteUnknownError("Unknown Error")
 
-        return error(501, {
-            message: message,
-            trace: null,
-            timestamp: null,
-            paste_id: null,
-        })
-    }
-
-    if (config == null) {
-        return error(404, {
-            message: "Paste Not Found.",
-            trace: "The paste provided could not be found.",
-            timestamp: null,
-            paste_id: null,
+        return error(500, {
+            message: unknownError.message,
+            error: unknownError,
+            paste_id: undefined,
         })
     }
 
