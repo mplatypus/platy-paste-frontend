@@ -17,20 +17,21 @@ export const load: PageLoad = async ({ fetch }) => {
             if (err instanceof PasteTimeoutError) {
                 return error(429, {
                     message: err.message,
-                    error: err,
+                    trace: null,
                     paste_id: undefined,
                 })
             }
             if (err instanceof PasteHTTPError) {
                 return error(err.status, {
                     message: err.message,
-                    error: err,
+                    trace: err.trace,
+                    time: err.time,
                     paste_id: undefined,
                 })
             }
             return error(500, {
                 message: err.message,
-                error: err,
+                trace: null,
                 paste_id: undefined,
             })
         }
@@ -39,7 +40,7 @@ export const load: PageLoad = async ({ fetch }) => {
 
         return error(500, {
             message: unknownError.message,
-            error: unknownError,
+            trace: null,
             paste_id: undefined,
         })
     }
