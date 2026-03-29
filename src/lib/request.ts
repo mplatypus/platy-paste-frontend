@@ -225,11 +225,11 @@ export async function requestHandler(
         case 204:
             let optional = parameters?.optional ?? true
 
-            if (optional) return null as any
+            if (optional) return null
             if (!optional)
                 throw new errors.PasteError(
                     "Expected a response, but received nothing.",
-                ) // FIXME: This should really be set to true.
+                )
         case 400:
             throw errors.PasteBadRequestError.fromHTTPError(
                 await response.json(),
@@ -269,7 +269,7 @@ export async function requestHandler(
             }
             throw new errors.PasteHTTPError(
                 response.status,
-                "An unhandled response type was received.",
+                `An unknown response type was received. (${response.status})`,
                 null,
                 undefined,
             )
