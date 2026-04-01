@@ -149,7 +149,7 @@ export async function requestHandler(
 ): Promise<string | null> {
     let remaining: number | undefined = undefined
     let reset: Date | undefined = undefined
-    if (localStorage != null && localStorage.getItem != null) {
+    if (typeof localStorage !== "undefined" && localStorage.getItem != null) {
         let limit = localStorage.getItem(route.route.toString())
         if (limit != null) {
             let limitParser =
@@ -209,7 +209,8 @@ export async function requestHandler(
     let rateLimitHeaders = parseRateLimitHeaders(response.headers)
 
     if (
-        localStorage != null &&
+        typeof localStorage !== "undefined" &&
+        localStorage.setItem != null &&
         rateLimitHeaders.remaining != undefined &&
         rateLimitHeaders.reset != undefined
     ) {
