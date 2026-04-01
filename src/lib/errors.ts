@@ -34,22 +34,6 @@ export class PasteError extends Error {
 }
 
 /**
- * Paste Unknown Error
- *
- * @remarks
- * This is a response when an error is unknown.
- *
- * @param message - The message that will be shown in the error.
- */
-export class PasteUnknownError extends Error {
-    constructor(message: string) {
-        super(message)
-        this.name = "PasteUnknownError"
-        Object.setPrototypeOf(this, PasteUnknownError.prototype)
-    }
-}
-
-/**
  * Paste Timeout Error
  *
  * @remarks
