@@ -18,7 +18,9 @@
 
     if (error != null) {
         message = error.message
-        trace = error.trace
+        if (error.trace != null) {
+            trace = error.trace
+        }
         time = error.time
     }
 </script>
